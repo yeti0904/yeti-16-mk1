@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/yeti-16
+yeti-16.so
+yeti-16.dylib
+yeti-16.dll
+yeti-16.a
+yeti-16.lib
+yeti-16-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst
