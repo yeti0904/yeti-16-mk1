@@ -1,4 +1,16 @@
-# Instructions
+# Architecture
+
+## Registers
+A  (16-bit)
+B  (16-bit)
+C  (16-bit)
+D  (16-bit)
+E  (16-bit)
+F  (16-bit) 
+DS (24-bit)
+SR (24-bit)
+IP (24-bit)
+SP (24-bit)
 
 ## Instruction format
 Opcode is a byte (8-bit), and then parameters after are either bytes for data or
@@ -16,7 +28,7 @@ registers, words (16-bit) for data, and 24-bit values for addresses
 - `RDW (reg pair)` (0x06) - reads a word from the given address (reg pair) into the
                             accumulator
 - `ADD (reg) (reg)` (0x07) - Adds the given registers to each other and stores the
-                             result in the accumulator
+                             result in the first given register
 - `SUB (reg) (reg)` (0x08) - Same as the last instruction, but with subtraction
 - `MUL (reg) (reg)` (0x09) - Same as the last instruction, but with multiplication
 - `DIV (reg) (reg)` (0x0A) - Same as the last instruction, but with division
@@ -27,12 +39,15 @@ registers, words (16-bit) for data, and 24-bit values for addresses
                              and 0 if they are not equal
 - `NOT (reg)` (0x0F) - Performs a bitwise NOT operation on the given register
 - `AND (reg) (reg)` (0x10) - Performs a bitwise AND operation on the given registers and
-                             stores the result in the accumulator
+                             stores the result in the first given register
 - `OR (reg) (reg)` (0x11) - Same as the last instruction, but with bitwise OR
-- `XOR (reg) (reg)` (0x11) - Same as the last instruction, but with bitwise XOR
-- `JNZ (addr)` (0x12) - Jumps to the given address if the accumulator is not 0
-- `JMP (addr)` (0x13) - Jumps to the given address
-- `OUT (byte) (reg)` (0x14) - Writes the given register to the given device (byte)
-- `IN (byte)` (0x13) - Reads from the given register and stores the result in the
+- `XOR (reg) (reg)` (0x12) - Same as the last instruction, but with bitwise XOR
+- `JNZ (addr)` (0x13) - Jumps to the given address if the accumulator is not 0
+- `JMP (addr)` (0x14) - Jumps to the given address
+- `OUT (byte) (reg)` (0x15) - Writes the given register to the given device (byte)
+- `IN (byte)` (0x16) - Reads from the given register and stores the result in the
                        accumulator
+- `LDA (reg pair) (addr)` (0x17) - Loads address into the given register pair
+- `INCP (reg pair)` (0x18) - Increments the given register pair
+- `DECP (reg pair)` (0x19) - Decrements the given register pair
 - `HLT` (0xFF) - Stops execution

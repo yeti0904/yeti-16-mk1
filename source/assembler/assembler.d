@@ -56,6 +56,9 @@ class Assembler {
 		AddInstruction("jmp",  Opcode.JMP,  [Param.Addr]);
 		AddInstruction("out",  Opcode.OUT,  [Param.Byte, Param.Register]);
 		AddInstruction("in",   Opcode.IN,   [Param.Byte]);
+		AddInstruction("lda",  Opcode.LDA,  [Param.RegisterPair, Param.Addr]);
+		AddInstruction("incp", Opcode.INCP, [Param.RegisterPair]);
+		AddInstruction("decp", Opcode.DECP, [Param.RegisterPair]);
 		AddInstruction("hlt",  Opcode.HLT,  []);
 	}
 
@@ -120,6 +123,8 @@ class Assembler {
 			case "ab": return 0;
 			case "cd": return 1;
 			case "ef": return 2;
+			case "ds": return 3;
+			case "sr": return 4;
 			default:   assert(0);
 		}
 	}

@@ -3,10 +3,13 @@ module yeti16.computer;
 import std.file;
 import std.stdio;
 import std.random;
+import std.datetime.stopwatch;
+import core.bitop;
 import core.stdc.stdlib;
 import bindbc.sdl;
 import yeti16.util;
 import yeti16.display;
+import yeti16.palette;
 
 enum Opcode {
 	NOP  = 0x00,
@@ -32,11 +35,15 @@ enum Opcode {
 	JMP  = 0x14,
 	OUT  = 0x15,
 	IN   = 0x16,
+	LDA  = 0x17,
+	INCP = 0x18,
+	DECP = 0x19,
 	HLT  = 0xFF
 }
 
 class Computer {
-	static const uint ramSize = 16777216; // 16 MiB
+	static const uint  ramSize = 16777216; // 16 MiB
+	static const float speed  = 1; // MHz
 
 	ubyte[] ram;
 	bool    halted;
@@ -48,6 +55,8 @@ class Computer {
 	ushort d;
 	ushort e;
 	ushort f;
+	uint   ds;
+	uint   sr;
 	uint   ip;
 	uint   sp;
 
@@ -55,8 +64,20 @@ class Computer {
 		ram    = new ubyte[](Computer.ramSize);
 		halted = false;
 
+		ubyte[256] chunk;
+
+		for (size_t i = 0; i < chunk.length; ++ i) {
+			chunk[i] = cast(ubyte) uniform(0, 256);
+		}
+
 		foreach (i, ref b ; ram) {
-			b = cast(ubyte) (i | i << 1);
+			b = (cast(ubyte) chunk[i % 256]).rol(i % 8);
+		}
+
+		// initialise display stuff
+		ram[0x000404] = 0x10; // 320x200 8bpp
+		for (uint i = 0; i < cast(uint) palette.length; ++ i) {
+			ram[0x00FE05 + i] = palette[i];
 		}
 	}
 
@@ -125,6 +146,8 @@ class Computer {
 				f = cast(ushort) (value & 0xFFFF);
 				break;
 			}
+			case 3: ds = value; break;
+			case 4: sr = value; break;
 			default: assert(0);
 		}
 	}
@@ -134,6 +157,8 @@ class Computer {
 			case 0:  return cast(ubyte) ((a << 16) | b);
 			case 1:  return cast(ubyte) ((c << 16) | d);
 			case 2:  return cast(ubyte) ((e << 16) | f);
+			case 3:  return ds;
+			case 4:  return sr;
 			default: assert(0);
 		}
 	}
@@ -196,15 +221,17 @@ class Computer {
 			case Opcode.MUL:
 			case Opcode.DIV:
 			case Opcode.MOD: {
-				ushort v1 = ReadReg(NextByte());
-				ushort v2 = ReadReg(NextByte());
+				auto   r1 = NextByte();
+				auto   r2 = NextByte();
+				ushort v1 = ReadReg(r1);
+				ushort v2 = ReadReg(r2);
 
 				final switch (inst) {
-					case Opcode.ADD: a = cast(ushort) (v1 + v2); break;
-					case Opcode.SUB: a = cast(ushort) (v1 - v2); break;
-					case Opcode.MUL: a = cast(ushort) (v1 * v2); break;
-					case Opcode.DIV: a = cast(ushort) (v1 / v2); break;
-					case Opcode.MOD: a = cast(ushort) (v1 % v2); break;
+					case Opcode.ADD: WriteReg(r1, cast(ushort) (v1 + v2)); break;
+					case Opcode.SUB: WriteReg(r1, cast(ushort) (v1 - v2)); break;
+					case Opcode.MUL: WriteReg(r1, cast(ushort) (v1 * v2)); break;
+					case Opcode.DIV: WriteReg(r1, cast(ushort) (v1 / v2)); break;
+					case Opcode.MOD: WriteReg(r1, cast(ushort) (v1 % v2)); break;
 				}
 				break;
 			}
@@ -232,13 +259,15 @@ class Computer {
 			case Opcode.AND:
 			case Opcode.OR:
 			case Opcode.XOR: {
-				ushort v1 = ReadReg(NextByte());
-				ushort v2 = ReadReg(NextByte());
+				auto   r1 = NextByte();
+				auto   r2 = NextByte();
+				ushort v1 = ReadReg(r1);
+				ushort v2 = ReadReg(r2);
 
 				final switch (inst) {
-					case Opcode.AND: a = v1 & v2; break;
-					case Opcode.OR:  a = v1 | v2; break;
-					case Opcode.XOR: a = v1 ^ v2; break;
+					case Opcode.AND: WriteReg(r1, v1 & v2); break;
+					case Opcode.OR:  WriteReg(r1, v1 | v2); break;
+					case Opcode.XOR: WriteReg(r1, v1 ^ v2); break;
 				}
 				break;
 			}
@@ -271,6 +300,22 @@ class Computer {
 				auto dev = NextByte();
 
 				assert(0);
+			}
+			case Opcode.LDA: {
+				auto reg  = NextByte();
+				auto addr = NextAddr();
+				WriteRegPair(reg, addr);
+				break;
+			}
+			case Opcode.INCP: {
+				auto reg = NextByte();
+				WriteRegPair(reg, ReadRegPair(reg) + 1);
+				break;
+			}
+			case Opcode.DECP: {
+				auto reg = NextByte();
+				WriteRegPair(reg, ReadRegPair(reg) - 1);
+				break;
 			}
 			case Opcode.HLT: {
 				halted = true;
@@ -308,8 +353,9 @@ int ComputerCLI(string[] args) {
 	}
 	computer.ip = 0x50000;
 
+	ulong ticks;
 	while (!computer.halted) {
-		SDL_Event e;
+		/*SDL_Event e;
 		while (SDL_PollEvent(&e)) {
 			switch (e.type) {
 				case SDL_QUIT: {
@@ -317,10 +363,15 @@ int ComputerCLI(string[] args) {
 				}
 				default: break;
 			}
-		}
+		}*/
+
+		auto sw = StopWatch(AutoStart.yes);
 
 		computer.RunInstruction();
-		display.Render();
+
+		sw.stop();
+		writefln("%g/s", 1000000000 / sw.peek.total!("nsecs"));
+		//display.Render();
 	}
 
 	return 0;
