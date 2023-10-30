@@ -2,6 +2,7 @@ module yeti16.computer;
 
 import std.file;
 import std.stdio;
+import std.format;
 import std.random;
 import std.datetime.stopwatch;
 import core.bitop;
@@ -38,12 +39,20 @@ enum Opcode {
 	LDA  = 0x17,
 	INCP = 0x18,
 	DECP = 0x19,
+	SETL = 0x1A,
+	CPL  = 0x1B,
 	HLT  = 0xFF
+}
+
+class ComputerException : Exception {
+	this(string msg, string file = __FILE__, size_t line = __LINE__) {
+		super(msg, file, line);
+	}
 }
 
 class Computer {
 	static const uint  ramSize = 16777216; // 16 MiB
-	static const float speed  = 1; // MHz
+	static const float speed   = 1; // MHz
 
 	ubyte[] ram;
 	bool    halted;
@@ -113,7 +122,7 @@ class Computer {
 			case 3:  d = value; break;
 			case 4:  e = value; break;
 			case 5:  f = value; break;
-			default: assert(0);
+			default: throw new ComputerException(format("Invalid register %X", reg));
 		}
 	}
 
@@ -125,7 +134,7 @@ class Computer {
 			case 3:  return d;
 			case 4:  return e;
 			case 5:  return f;
-			default: assert(0);
+			default: throw new ComputerException(format("Invalid register %X", reg));
 		}
 	}
 
@@ -148,7 +157,7 @@ class Computer {
 			}
 			case 3: ds = value; break;
 			case 4: sr = value; break;
-			default: assert(0);
+			default: throw new ComputerException(format("Invalid register %X", reg));
 		}
 	}
 
@@ -159,7 +168,7 @@ class Computer {
 			case 2:  return cast(ubyte) ((e << 16) | f);
 			case 3:  return ds;
 			case 4:  return sr;
-			default: assert(0);
+			default: throw new ComputerException(format("Invalid register %X", reg));
 		}
 	}
 
@@ -288,18 +297,15 @@ class Computer {
 				auto val = ReadReg(NextByte());
 
 				switch (dev) {
-					case 0: {
-						writef("%c", cast(char) val);
-						break;
-					}
-					default: assert(0);
+					default: throw new ComputerException(format("Invalid device %X", dev));
 				}
-				break;
 			}
 			case Opcode.IN: {
 				auto dev = NextByte();
 
-				assert(0);
+				switch (dev) {
+					default: throw new ComputerException(format("Invalid device %X", dev));
+				}
 			}
 			case Opcode.LDA: {
 				auto reg  = NextByte();
@@ -317,11 +323,38 @@ class Computer {
 				WriteRegPair(reg, ReadRegPair(reg) - 1);
 				break;
 			}
+			case Opcode.SETL: {
+				auto value = cast(ubyte) (ReadReg(NextByte()) & 0xFF);
+
+				while (c > 0) {
+					ram[ds] = value;
+
+					++ ds;
+
+					if (ds > 0xFFFFFF) ds = 0;
+					-- c;
+				}
+				break;
+			}
+			case Opcode.CPL: {
+				while (c > 0) {
+					ram[ds] = ram[sr];
+
+					++ ds;
+					++ sr;
+
+					if (ds > 0xFFFFFF) ds = 0;
+					if (sr > 0xFFFFFF) sr = 0;
+
+					-- c;
+				}
+				break;
+			}
 			case Opcode.HLT: {
 				halted = true;
 				break;
 			}
-			default: assert(0);
+			default: throw new ComputerException(format("Invalid instruction %X", inst));
 		}
 	}
 }
@@ -355,7 +388,7 @@ int ComputerCLI(string[] args) {
 
 	ulong ticks;
 	while (!computer.halted) {
-		/*SDL_Event e;
+		SDL_Event e;
 		while (SDL_PollEvent(&e)) {
 			switch (e.type) {
 				case SDL_QUIT: {
@@ -363,15 +396,24 @@ int ComputerCLI(string[] args) {
 				}
 				default: break;
 			}
-		}*/
+		}
 
-		auto sw = StopWatch(AutoStart.yes);
-
-		computer.RunInstruction();
-
-		sw.stop();
-		writefln("%g/s", 1000000000 / sw.peek.total!("nsecs"));
-		//display.Render();
+		try {
+			computer.RunInstruction();
+		}
+		catch (Exception e) {
+			stderr.writeln("EMULATOR CRASH!");
+			stderr.writeln("===============");
+			stderr.writefln(
+				"A: %X\nB: %X\nC: %X\nD: %X\nE: %X\nF: %X\nDS: %X\nSR: %X\n" ~
+				"IP: %X\nSP: %X",
+				computer.a, computer.b, computer.c, computer.d, computer.e, computer.f,
+				computer.ds, computer.sr, computer.ip, computer.sp
+			);
+			writeln(e);
+			return 1;
+		}
+		display.Render();
 	}
 
 	return 0;

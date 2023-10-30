@@ -50,4 +50,8 @@ registers, words (16-bit) for data, and 24-bit values for addresses
 - `LDA (reg pair) (addr)` (0x17) - Loads address into the given register pair
 - `INCP (reg pair)` (0x18) - Increments the given register pair
 - `DECP (reg pair)` (0x19) - Decrements the given register pair
+- `SETL (reg)` (0x1A) - Copies the lowest byte of the given register `C` times starting
+                        from the address in `DR`
+- `CPL` (0x1B) - Copies the bytes from memory at address `SR` to memory at address `DR`
+                 `C` times
 - `HLT` (0xFF) - Stops execution

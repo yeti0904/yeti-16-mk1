@@ -59,6 +59,8 @@ class Assembler {
 		AddInstruction("lda",  Opcode.LDA,  [Param.RegisterPair, Param.Addr]);
 		AddInstruction("incp", Opcode.INCP, [Param.RegisterPair]);
 		AddInstruction("decp", Opcode.DECP, [Param.RegisterPair]);
+		AddInstruction("setl", Opcode.SETL, [Param.Register]);
+		AddInstruction("cpl",  Opcode.CPL,  []);
 		AddInstruction("hlt",  Opcode.HLT,  []);
 	}
 
@@ -233,6 +235,7 @@ class Assembler {
 				}
 
 				if (!valid) {
+					writeln(params[i]);
 					Error(format("Parameter %d is invalid", i + 1));
 					exit(1);
 				}

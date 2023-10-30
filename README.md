@@ -19,3 +19,7 @@ dub build
 ```
 ./yeti016 run (bin file)
 ```
+
+## TODO
+- [ ] more graphics modes
+- [ ] text mode
