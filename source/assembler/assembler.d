@@ -167,6 +167,9 @@ class Assembler {
 			if (tokens[i].type == TokenType.End) {
 				++ i;
 			}
+			if (tokens[i].type == TokenType.Label) {
+				continue;
+			}
 		
 			ExpectType(TokenType.Identifier);
 
@@ -259,6 +262,11 @@ class Assembler {
 								break;
 							}
 							case TokenType.Identifier: {
+								if (InstructionExists(params[i].contents)) {
+									Error("Instruction name as identifier");
+									exit(1);
+								}
+							
 								addr = labels[params[i].contents];
 								break;
 							}
@@ -278,7 +286,7 @@ class Assembler {
 
 int AssemblerCLI(string[] args) {
 	string inFile;
-	string outFile = "out.asm";
+	string outFile = "out.bin";
 	bool   debugLexer;
 
 	for (size_t i = 0; i < args.length; ++ i) {

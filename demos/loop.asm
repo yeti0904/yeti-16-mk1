@@ -1,2 +1,2 @@
-jmp 327680
-
+loop:
+	jmp loop
