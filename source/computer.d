@@ -287,7 +287,7 @@ int ComputerCLI(string[] args) {
 	display.Init();
 	display.computer = computer;
 
-	ubyte[] program = [0x14, 0x00, 0x00, 0x50];
+	ubyte[] program = [0x14, 0x00, 0x00, 0x05];
 
 	for (size_t i = 0; i < args.length; ++ i) {
 		if (args[i][0] == '-') {

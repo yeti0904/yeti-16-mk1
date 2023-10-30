@@ -278,7 +278,7 @@ class Assembler {
 
 int AssemblerCLI(string[] args) {
 	string inFile;
-	string outFile;
+	string outFile = "out.asm";
 	bool   debugLexer;
 
 	for (size_t i = 0; i < args.length; ++ i) {
@@ -303,6 +303,11 @@ int AssemblerCLI(string[] args) {
 		else {
 			inFile = args[i];
 		}
+	}
+
+	if (inFile == "") {
+		stderr.writefln("Assembler: no input file");
+		return 1;
 	}
 
 	auto assembler = new Assembler();
