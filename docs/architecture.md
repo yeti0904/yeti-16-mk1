@@ -54,4 +54,11 @@ registers, words (16-bit) for data, and 24-bit values for addresses
                         from the address in `DR`
 - `CPL` (0x1B) - Copies the bytes from memory at address `SR` to memory at address `DR`
                  `C` times
+- `CALL (addr)` (0x1C) - Pushes IP to the stack and jumps to the given address
+- `RET` (0x1D) - Pops from the stack into IP
+- `INT (byte)` (0x1E) - Calls the given interrupt from the interrupt table
+- `WRA (reg pair) (reg pair)` (0x1F) - Writes the given register pair (second) to the
+                                       given address (first)
+- `RDA (reg pair)` (0x20) - Reads a 24-bit address from the given register pair in memory
+                            and stores the value in AB
 - `HLT` (0xFF) - Stops execution

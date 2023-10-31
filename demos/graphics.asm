@@ -1,5 +1,5 @@
 set f 0
-set d 1
+set d 65535
 set b 0
 
 jmp nextIt
@@ -7,7 +7,9 @@ jmp nextIt
 loop:
 	dec d
 	cmp d b
-	jnz nextIt
+	; uncomment the following code if you want to see every colour ever flash in front
+	; of you, so consider this an epilepsy warning
+	;jnz nextIt
 	jmp loop
 
 nextIt:

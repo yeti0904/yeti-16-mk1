@@ -6,6 +6,7 @@ import std.format;
 import std.random;
 import std.datetime.stopwatch;
 import core.bitop;
+import core.thread;
 import core.stdc.stdlib;
 import bindbc.sdl;
 import yeti16.util;
@@ -41,7 +42,29 @@ enum Opcode {
 	DECP = 0x19,
 	SETL = 0x1A,
 	CPL  = 0x1B,
+	CALL = 0x1C,
+	RET  = 0x1D,
+	INT  = 0x1E,
+	WRA  = 0x1F,
+	RDA  = 0x20,
 	HLT  = 0xFF
+}
+
+enum Register {
+	A = 0,
+	B = 1,
+	C = 2,
+	D = 3,
+	E = 4,
+	F = 5
+}
+
+enum RegPair {
+	AB = 0,
+	CD = 1,
+	EF = 2,
+	DS = 3,
+	SR = 4
 }
 
 class ComputerException : Exception {
@@ -51,8 +74,8 @@ class ComputerException : Exception {
 }
 
 class Computer {
-	static const uint  ramSize = 16777216; // 16 MiB
-	static const float speed   = 1; // MHz
+	static const uint   ramSize = 16777216; // 16 MiB
+	static const double speed   = 1; // MHz
 
 	ubyte[] ram;
 	bool    halted;
@@ -116,58 +139,58 @@ class Computer {
 
 	void WriteReg(ubyte reg, ushort value) {
 		switch (reg) {
-			case 0:  a = value; break;
-			case 1:  b = value; break;
-			case 2:  c = value; break;
-			case 3:  d = value; break;
-			case 4:  e = value; break;
-			case 5:  f = value; break;
+			case Register.A:  a = value; break;
+			case Register.B:  b = value; break;
+			case Register.C:  c = value; break;
+			case Register.D:  d = value; break;
+			case Register.E:  e = value; break;
+			case Register.F:  f = value; break;
 			default: throw new ComputerException(format("Invalid register %X", reg));
 		}
 	}
 
 	ushort ReadReg(ubyte reg) {
 		switch (reg) {
-			case 0:  return a;
-			case 1:  return b;
-			case 2:  return c;
-			case 3:  return d;
-			case 4:  return e;
-			case 5:  return f;
+			case Register.A:  return a;
+			case Register.B:  return b;
+			case Register.C:  return c;
+			case Register.D:  return d;
+			case Register.E:  return e;
+			case Register.F:  return f;
 			default: throw new ComputerException(format("Invalid register %X", reg));
 		}
 	}
 
 	void WriteRegPair(ubyte reg, uint value) {
 		switch (reg) {
-			case 0: {
+			case RegPair.AB: {
 				a = cast(ushort) ((value & 0xFF0000) >> 16);
 				b = cast(ushort) (value & 0xFFFF);
 				break;
 			}
-			case 1: {
+			case RegPair.CD: {
 				c = cast(ushort) ((value & 0xFF0000) >> 16);
 				d = cast(ushort) (value & 0xFFFF);
 				break;
 			}
-			case 2: {
+			case RegPair.EF: {
 				e = cast(ushort) ((value & 0xFF0000) >> 16);
 				f = cast(ushort) (value & 0xFFFF);
 				break;
 			}
-			case 3: ds = value; break;
-			case 4: sr = value; break;
+			case RegPair.DS: ds = value; break;
+			case RegPair.SR: sr = value; break;
 			default: throw new ComputerException(format("Invalid register %X", reg));
 		}
 	}
 
 	uint ReadRegPair(ubyte reg) {
 		switch (reg) {
-			case 0:  return cast(ubyte) ((a << 16) | b);
-			case 1:  return cast(ubyte) ((c << 16) | d);
-			case 2:  return cast(ubyte) ((e << 16) | f);
-			case 3:  return ds;
-			case 4:  return sr;
+			case RegPair.AB:  return cast(ubyte) ((a << 16) | b);
+			case RegPair.CD:  return cast(ubyte) ((c << 16) | d);
+			case RegPair.EF:  return cast(ubyte) ((e << 16) | f);
+			case RegPair.DS:  return ds;
+			case RegPair.SR:  return sr;
 			default: throw new ComputerException(format("Invalid register %X", reg));
 		}
 	}
@@ -180,7 +203,32 @@ class Computer {
 
 	void WriteWord(uint addr, ushort value) {
 		ram[addr]     = cast(ubyte) (value & 0xFF);
-		ram[addr + 1] = cast(ubyte) (value & 0xFF00);
+		ram[addr + 1] = cast(ubyte) ((value & 0xFF00) >> 8);
+	}
+
+	uint ReadAddr(uint addr) {
+		uint ret = ram[addr];
+		ret |= ram[addr + 1] << 8;
+		ret |= ram[addr + 2] << 16;
+		return ret;
+	}
+
+	void WriteAddr(uint addr, uint value) {
+		ram[addr]     = cast(ubyte) (value & 0xFF);
+		ram[addr + 1] = cast(ubyte) ((value & 0xFF00) >> 8);
+		ram[addr + 2] = cast(ubyte) ((value & 0xFF0000) >> 16);
+	}
+
+	void CallInterrupt(ubyte interrupt) {
+		uint interruptAddr = 4 + (interrupt * 4);
+
+		if (ram[interruptAddr] == 0) {
+			throw new ComputerException(format("Called disabled register %X", interrupt));
+		}
+
+		WriteAddr(sp, ip);
+		sp += 3;
+		ip  = ReadAddr(interruptAddr + 1);
 	}
 
 	void RunInstruction() {
@@ -351,6 +399,37 @@ class Computer {
 				}
 				break;
 			}
+			case Opcode.CALL: {
+				auto addr = NextAddr();
+
+				WriteAddr(sp, ip);
+				sp += 3;
+				ip  = addr;
+				break;
+			}
+			case Opcode.RET: {
+				sp -= 3;
+				ip  = ReadAddr(sp);
+				break;
+			}
+			case Opcode.INT: {
+				auto interrupt = NextByte();
+				CallInterrupt(interrupt);
+				break;
+			}
+			case Opcode.WRA: {
+				auto addr  = ReadRegPair(NextByte());
+				auto value = ReadRegPair(NextByte());
+
+				WriteAddr(addr, value);
+				break;
+			}
+			case Opcode.RDA: {
+				auto addr = ReadRegPair(NextByte());
+
+				WriteRegPair(RegPair.AB, ReadAddr(addr));
+				break;
+			}
 			case Opcode.HLT: {
 				halted = true;
 				break;
@@ -387,7 +466,12 @@ int ComputerCLI(string[] args) {
 	}
 	computer.ip = 0x50000;
 
-	ulong ticks;
+	ulong  ticks;
+	double frameTimeGoal = 1000 / 60;
+	uint   instPerFrame  = cast(uint) ((Computer.speed * 1000000) / 60);
+
+	writefln("Running %d instructions per frame", instPerFrame);
+	
 	while (!computer.halted) {
 		SDL_Event e;
 		while (SDL_PollEvent(&e)) {
@@ -399,22 +483,33 @@ int ComputerCLI(string[] args) {
 			}
 		}
 
-		try {
-			computer.RunInstruction();
-		}
-		catch (Exception e) {
-			stderr.writeln("EMULATOR CRASH!");
-			stderr.writeln("===============");
-			stderr.writefln(
-				"A: %X\nB: %X\nC: %X\nD: %X\nE: %X\nF: %X\nDS: %X\nSR: %X\n" ~
-				"IP: %X\nSP: %X",
-				computer.a, computer.b, computer.c, computer.d, computer.e, computer.f,
-				computer.ds, computer.sr, computer.ip, computer.sp
-			);
-			writeln(e);
-			return 1;
+		auto sw = StopWatch(AutoStart.yes);
+
+		foreach (i ; 0 .. instPerFrame) {
+			try {
+				computer.RunInstruction();
+			}
+			catch (Exception e) {
+				stderr.writeln("EMULATOR CRASH!");
+				stderr.writeln("===============");
+				stderr.writefln(
+					"A: %X\nB: %X\nC: %X\nD: %X\nE: %X\nF: %X\nDS: %X\nSR: %X\n" ~
+					"IP: %X\nSP: %X",
+					computer.a, computer.b, computer.c, computer.d, computer.e, computer.f,
+					computer.ds, computer.sr, computer.ip, computer.sp
+				);
+				writeln(e);
+				return 1;
+			}
 		}
 		display.Render();
+
+		sw.stop();
+
+		double frameTime = sw.peek.total!("msecs");
+		if (frameTimeGoal > frameTime) {
+			Thread.sleep(dur!("msecs")(cast(long) (frameTimeGoal - frameTime)));
+		}
 	}
 
 	return 0;

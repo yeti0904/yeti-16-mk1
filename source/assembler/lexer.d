@@ -116,6 +116,10 @@ class Lexer {
 						AddToken(TokenType.Label);
 						break;
 					}
+					case ';': {
+						while ((i < src.length) && (src[i] != '\n')) ++ i;
+						break;
+					}
 					default: {
 						reading ~= src[i];
 					}

@@ -35,9 +35,7 @@ class Display {
 			exit(1);
 		}
 
-		renderer = SDL_CreateRenderer(
-			window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED
-		);
+		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 		if (renderer is null) {
 			stderr.writefln("Failed to create renderer: %s", GetError());
