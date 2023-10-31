@@ -246,6 +246,7 @@ class Computer {
 			}
 			case Opcode.INC: {
 				auto reg = NextByte();
+				
 				WriteReg(reg, cast(ushort) (ReadReg(reg) + 1));
 				break;
 			}

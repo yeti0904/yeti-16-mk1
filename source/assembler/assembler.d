@@ -145,9 +145,8 @@ class Assembler {
 
 	void Assemble() {
 		// generate labels
+		uint labelAddr = 0x050000;
 		for (i = 0; i < tokens.length; ++ i) {
-			uint addr = 0x050000;
-
 			switch (tokens[i].type) {
 				case TokenType.Label: {
 					if (InstructionExists(tokens[i].contents)) {
@@ -155,7 +154,7 @@ class Assembler {
 						exit(1);
 					}
 				
-					labels[tokens[i].contents] = addr;
+					labels[tokens[i].contents] = labelAddr;
 					break;
 				}
 				case TokenType.Identifier: {
@@ -163,7 +162,8 @@ class Assembler {
 						break;
 					}
 
-					addr += GetInstructionSize(tokens[i].contents);
+
+					labelAddr += GetInstructionSize(tokens[i].contents);
 					break;
 				}
 				default: break;
@@ -236,7 +236,12 @@ class Assembler {
 
 				if (!valid) {
 					writeln(params[i]);
-					Error(format("Parameter %d is invalid", i + 1));
+					Error(
+						format(
+							"Parameter %d is invalid for instruction %s", i + 1,
+							inst.name
+						)
+					);
 					exit(1);
 				}
 			}
