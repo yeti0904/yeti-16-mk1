@@ -47,6 +47,8 @@ enum Opcode {
 	INT  = 0x1E,
 	WRA  = 0x1F,
 	RDA  = 0x20,
+	CPR  = 0x21,
+	CPP  = 0x22,
 	HLT  = 0xFF
 }
 
@@ -75,7 +77,7 @@ class ComputerException : Exception {
 
 class Computer {
 	static const uint   ramSize = 16777216; // 16 MiB
-	static const double speed   = 1; // MHz
+	static const double speed   = 8; // MHz
 
 	ubyte[] ram;
 	bool    halted;
@@ -430,6 +432,18 @@ class Computer {
 				WriteRegPair(RegPair.AB, ReadAddr(addr));
 				break;
 			}
+			case Opcode.CPR: {
+				auto reg1 = NextByte();
+				auto reg2 = NextByte();
+				WriteReg(reg1, ReadReg(reg2));
+				break;
+			}
+			case Opcode.CPP: {
+				auto reg1 = NextByte();
+				auto reg2 = NextByte();
+				WriteRegPair(reg1, ReadRegPair(reg2));
+				break;
+			}
 			case Opcode.HLT: {
 				halted = true;
 				break;
@@ -471,6 +485,8 @@ int ComputerCLI(string[] args) {
 	uint   instPerFrame  = cast(uint) ((Computer.speed * 1000000) / 60);
 
 	writefln("Running %d instructions per frame", instPerFrame);
+
+	double[60] times;
 	
 	while (!computer.halted) {
 		SDL_Event e;
@@ -510,6 +526,9 @@ int ComputerCLI(string[] args) {
 		if (frameTimeGoal > frameTime) {
 			Thread.sleep(dur!("msecs")(cast(long) (frameTimeGoal - frameTime)));
 		}
+		
+		++ ticks;
+		if (ticks >= 60) ticks = 0;
 	}
 
 	return 0;

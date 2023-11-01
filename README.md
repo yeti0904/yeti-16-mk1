@@ -4,6 +4,11 @@
 Warning: Breaking changes will happen during early development, meaning older binaries
 may not work properly on newer versions
 
+## Specs
+8 MHz CPU
+16 MiB RAM
+Up to 256 devices
+
 ## Build
 ```
 dub build

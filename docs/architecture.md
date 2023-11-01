@@ -61,4 +61,6 @@ registers, words (16-bit) for data, and 24-bit values for addresses
                                        given address (first)
 - `RDA (reg pair)` (0x20) - Reads a 24-bit address from the given register pair in memory
                             and stores the value in AB
+- `CPR (reg) (reg)` (0x21) - Copies the value of the second register to the first register
+- `CPP (reg pair) (reg pair)` (0x22) - Same as CPR but for register pairs
 - `HLT` (0xFF) - Stops execution

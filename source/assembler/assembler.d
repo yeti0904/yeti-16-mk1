@@ -61,6 +61,13 @@ class Assembler {
 		AddInstruction("decp", Opcode.DECP, [Param.RegisterPair]);
 		AddInstruction("setl", Opcode.SETL, [Param.Register]);
 		AddInstruction("cpl",  Opcode.CPL,  []);
+		AddInstruction("call", Opcode.CALL, [Param.Addr]);
+		AddInstruction("ret",  Opcode.RET,  []);
+		AddInstruction("int",  Opcode.INT,  [Param.Byte]);
+		AddInstruction("wra",  Opcode.WRA,  [Param.RegisterPair, Param.RegisterPair]);
+		AddInstruction("rda",  Opcode.RDA,  [Param.RegisterPair]);
+		AddInstruction("cpr",  Opcode.CPR,  [Param.Register, Param.Register]);
+		AddInstruction("cpp",  Opcode.CPP,  [Param.RegisterPair, Param.RegisterPair]);
 		AddInstruction("hlt",  Opcode.HLT,  []);
 	}
 
