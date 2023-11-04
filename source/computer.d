@@ -72,9 +72,27 @@ enum RegPair {
 	BS = 5
 }
 
+enum ErrorInterrupt {
+	Null               = 0,
+	DivZero            = 1,
+	BadParam           = 2,
+	DisabledInterrupt  = 3,
+	InvalidDevice      = 4,
+	InvalidInstruction = 5,
+	StackUnderflow     = 6,
+	StackOverflow      = 7, // fuck this website
+	NothingToRead      = 8
+}
+
 class ComputerException : Exception {
 	this(string msg, string file = __FILE__, size_t line = __LINE__) {
 		super(msg, file, line);
+	}
+}
+
+class CancelInstruction : Exception {
+	this(string file = __FILE__, size_t line = __LINE__) {
+		super("", file, line);
 	}
 }
 
@@ -145,25 +163,28 @@ class Computer {
 
 	void WriteReg(ubyte reg, ushort value) {
 		switch (reg) {
-			case Register.A:  a = value; break;
-			case Register.B:  b = value; break;
-			case Register.C:  c = value; break;
-			case Register.D:  d = value; break;
-			case Register.E:  e = value; break;
-			case Register.F:  f = value; break;
-			default: throw new ComputerException(format("Invalid register %X", reg));
+			case Register.A: a = value; break;
+			case Register.B: b = value; break;
+			case Register.C: c = value; break;
+			case Register.D: d = value; break;
+			case Register.E: e = value; break;
+			case Register.F: f = value; break;
+			default:         Error(ErrorInterrupt.BadParam);
 		}
 	}
 
 	ushort ReadReg(ubyte reg) {
 		switch (reg) {
-			case Register.A:  return a;
-			case Register.B:  return b;
-			case Register.C:  return c;
-			case Register.D:  return d;
-			case Register.E:  return e;
-			case Register.F:  return f;
-			default: throw new ComputerException(format("Invalid register %X", reg));
+			case Register.A: return a;
+			case Register.B: return b;
+			case Register.C: return c;
+			case Register.D: return d;
+			case Register.E: return e;
+			case Register.F: return f;
+			default: {
+				Error(ErrorInterrupt.BadParam);
+				return 0;
+			}
 		}
 	}
 
@@ -187,7 +208,7 @@ class Computer {
 			case RegPair.DS: ds = value; break;
 			case RegPair.SR: sr = value; break;
 			case RegPair.BS: bs = value; break;
-			default: throw new ComputerException(format("Invalid register %X", reg));
+			default:         Error(ErrorInterrupt.BadParam);
 		}
 	}
 
@@ -199,7 +220,10 @@ class Computer {
 			case RegPair.DS: return ds;
 			case RegPair.SR: return sr;
 			case RegPair.BS: return bs;
-			default: throw new ComputerException(format("Invalid register %X", reg));
+			default: {
+				Error(ErrorInterrupt.BadParam);
+				return 0;
+			}
 		}
 	}
 
@@ -235,12 +259,50 @@ class Computer {
 		uint interruptAddr = 4 + (interrupt * 4);
 
 		if (ram[interruptAddr] == 0) {
-			throw new ComputerException(format("Called disabled register %X", interrupt));
+			Error(ErrorInterrupt.DisabledInterrupt);
 		}
 
 		WriteAddr(sp, ip);
 		sp += 3;
 		ip  = ReadAddr(interruptAddr + 1);
+	}
+
+	void Error(ErrorInterrupt error) {
+		if (InterruptEnabled(cast(ubyte) error)) {
+			CallInterrupt(cast(ubyte) error);
+			throw new CancelInstruction();
+		}
+		else {
+			final switch (error) {
+				case ErrorInterrupt.Null: {
+					throw new ComputerException("Wrote to NULL");
+				}
+				case ErrorInterrupt.DivZero: {
+					throw new ComputerException("Divided by 0");
+				}
+				case ErrorInterrupt.BadParam: {
+					throw new ComputerException("Bad parameter");
+				}
+				case ErrorInterrupt.DisabledInterrupt: {
+					throw new ComputerException("Called disabled interrupt");
+				}
+				case ErrorInterrupt.InvalidDevice: {
+					throw new ComputerException("Using invalid device");
+				}
+				case ErrorInterrupt.InvalidInstruction: {
+					throw new ComputerException("Invalid instruction");
+				}
+				case ErrorInterrupt.StackUnderflow: {
+					throw new ComputerException("Stack underflow");
+				}
+				case ErrorInterrupt.StackOverflow: {
+					throw new ComputerException("Stack overflow");
+				}
+				case ErrorInterrupt.NothingToRead: {
+					throw new ComputerException("Nothing to read");
+				}
+			}
+		}
 	}
 
 	void RunInstruction() {
@@ -354,19 +416,21 @@ class Computer {
 				break;
 			}
 			case Opcode.OUT: {
-				auto dev = NextByte();
+				auto dev = ReadReg(NextByte());
 				auto val = ReadReg(NextByte());
 
 				switch (dev) {
-					default: throw new ComputerException(format("Invalid device %X", dev));
+					default: Error(ErrorInterrupt.InvalidDevice);
 				}
+				break;
 			}
 			case Opcode.IN: {
-				auto dev = NextByte();
+				auto dev = ReadReg(NextByte());
 
 				switch (dev) {
-					default: throw new ComputerException(format("Invalid device %X", dev));
+					default: Error(ErrorInterrupt.InvalidDevice);
 				}
+				break;
 			}
 			case Opcode.LDA: {
 				auto reg  = NextByte();
@@ -471,7 +535,7 @@ class Computer {
 				halted = true;
 				break;
 			}
-			default: throw new ComputerException(format("Invalid instruction %X", inst));
+			default: Error(ErrorInterrupt.InvalidInstruction);
 		}
 	}
 }
@@ -527,6 +591,9 @@ int ComputerCLI(string[] args) {
 		foreach (i ; 0 .. instPerFrame) {
 			try {
 				computer.RunInstruction();
+			}
+			catch (CancelInstruction) {
+				continue;
 			}
 			catch (Exception e) {
 				stderr.writeln("EMULATOR CRASH!");

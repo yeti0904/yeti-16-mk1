@@ -45,8 +45,8 @@ registers, words (16-bit) for data, and 24-bit values for addresses
 - `XOR (reg) (reg)` (0x12) - Same as the last instruction, but with bitwise XOR
 - `JNZ (addr)` (0x13) - Jumps to the given address if the accumulator is not 0
 - `JMP (addr)` (0x14) - Jumps to the given address
-- `OUT (byte) (reg)` (0x15) - Writes the given register to the given device (byte)
-- `IN (byte)` (0x16) - Reads from the given register and stores the result in the
+- `OUT (reg) (reg)` (0x15) - Writes the given register (second) to the given device (first)
+- `IN (reg)` (0x16) - Reads from the given device (reg) and stores the result in the
                        accumulator
 - `LDA (reg pair) (addr)` (0x17) - Loads address into the given register pair
 - `INCP (reg pair)` (0x18) - Increments the given register pair
