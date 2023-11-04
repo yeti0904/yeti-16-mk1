@@ -623,7 +623,20 @@ int ComputerCLI(string[] args) {
 		writefln(" - (%X) %s", i, dev.name);
 	}
 
-	writefln(" - (%X) Nvidia RTX 4090 Ti", computer.devices.length); // hee hee
+	ubyte rtxID = 255;
+
+	foreach_reverse (ref dev ; computer.devices) {
+		if (dev is null) {
+			-- rtxID;
+		}
+		else {
+			break;
+		}
+	}
+
+	++ rtxID;
+
+	writefln(" - (%X) Nvidia RTX 4090 Ti", rtxID); // hee hee
 
 	double[60] times;
 	
