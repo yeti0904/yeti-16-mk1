@@ -1,3 +1,4 @@
+; use YETI-16 graphics controller to load palette
 set a 2
 set b 80
 out a b

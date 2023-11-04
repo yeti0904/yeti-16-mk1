@@ -1,4 +1,6 @@
 # YETI-16
+![Lines demo](/screenshots/lines.png)
+
 16-bit fantasy computer
 
 Warning: Breaking changes will happen during early development, meaning older binaries
