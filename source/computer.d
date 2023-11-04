@@ -4,6 +4,7 @@ import std.file;
 import std.stdio;
 import std.format;
 import std.random;
+import std.algorithm;
 import std.datetime.stopwatch;
 import core.bitop;
 import core.thread;
@@ -12,6 +13,7 @@ import bindbc.sdl;
 import yeti16.util;
 import yeti16.display;
 import yeti16.palette;
+import yeti16.deviceBase;
 
 enum Opcode {
 	NOP  = 0x00,
@@ -51,6 +53,8 @@ enum Opcode {
 	CPP  = 0x22,
 	JMPB = 0x23,
 	JNZB = 0x24,
+	CHK  = 0x25,
+	ISON = 0x26,
 	HLT  = 0xFF
 }
 
@@ -100,8 +104,9 @@ class Computer {
 	static const uint   ramSize = 16777216; // 16 MiB
 	static const double speed   = 8; // MHz
 
-	ubyte[] ram;
-	bool    halted;
+	ubyte[]     ram;
+	bool        halted;
+	Device[256] devices;
 
 	// registers
 	ushort a;
@@ -135,6 +140,12 @@ class Computer {
 		for (uint i = 0; i < cast(uint) palette.length; ++ i) {
 			ram[0x00FE05 + i] = palette[i];
 		}
+
+		// initialise devices
+		import yeti16.devices.debugDevice;
+		import yeti16.devices.keyboard;
+		devices[0] = new Debug();
+		devices[1] = new Keyboard();
 	}
 
 	ubyte NextByte() {
@@ -416,20 +427,32 @@ class Computer {
 				break;
 			}
 			case Opcode.OUT: {
-				auto dev = ReadReg(NextByte());
+				auto dev = ReadReg(NextByte()) & 0xFF;
 				auto val = ReadReg(NextByte());
 
-				switch (dev) {
-					default: Error(ErrorInterrupt.InvalidDevice);
+				auto device = devices[dev];
+
+				if (device is null) {
+					Error(ErrorInterrupt.InvalidDevice);
 				}
+
+				device.Out(val);
 				break;
 			}
 			case Opcode.IN: {
-				auto dev = ReadReg(NextByte());
+				auto dev    = ReadReg(NextByte()) & 0xFF;
+				auto device = devices[dev];
 
-				switch (dev) {
-					default: Error(ErrorInterrupt.InvalidDevice);
+				if (device is null) {
+					Error(ErrorInterrupt.InvalidDevice);
 				}
+
+				if (device.data.length == 0) {
+					Error(ErrorInterrupt.NothingToRead);
+				}
+
+				a           = device.data[0];
+				device.data = device.data.remove(0);
 				break;
 			}
 			case Opcode.LDA: {
@@ -531,6 +554,24 @@ class Computer {
 				}
 				break;
 			}
+			case Opcode.CHK: {
+				auto dev = ReadReg(NextByte()) & 0xFF;
+
+				auto device = devices[dev];
+
+				if (device is null) {
+					Error(ErrorInterrupt.InvalidDevice);
+				}
+
+				a = device.data.length == 0? 0 : 0xFFFF;
+				break;
+			}
+			case Opcode.ISON: {
+				auto dev = ReadReg(NextByte()) & 0xFF;
+
+				a = devices[dev] is null? 0 : 0xFFFF;
+				break;
+			}
 			case Opcode.HLT: {
 				halted = true;
 				break;
@@ -541,9 +582,10 @@ class Computer {
 }
 
 int ComputerCLI(string[] args) {
-	auto computer = new Computer();
 	auto display  = new Display();
 	display.Init();
+	
+	auto computer = new Computer();
 	display.computer = computer;
 
 	ubyte[] program = [0x14, 0x00, 0x00, 0x05];
@@ -573,6 +615,16 @@ int ComputerCLI(string[] args) {
 
 	writefln("Running %d instructions per frame", instPerFrame);
 
+	writeln("Connected devices:");
+
+	foreach (i, ref dev ; computer.devices) {
+		if (dev is null) continue;
+	
+		writefln(" - (%X) %s", i, dev.name);
+	}
+
+	writefln(" - (%X) Nvidia RTX 4090 Ti", computer.devices.length); // hee hee
+
 	double[60] times;
 	
 	while (!computer.halted) {
@@ -582,7 +634,14 @@ int ComputerCLI(string[] args) {
 				case SDL_QUIT: {
 					exit(0);
 				}
-				default: break;
+				default: {
+					foreach (ref dev ; computer.devices) {
+						if (dev is null) continue;
+
+						dev.HandleEvent(&e);
+					}
+					break;
+				}
 			}
 		}
 
@@ -608,6 +667,13 @@ int ComputerCLI(string[] args) {
 				return 1;
 			}
 		}
+
+		foreach (ref dev ; computer.devices) {
+			if (dev is null) continue;
+
+			dev.Update();
+		}
+		
 		display.Render();
 
 		sw.stop();

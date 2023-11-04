@@ -55,8 +55,8 @@ class Assembler {
 		AddInstruction("xor",  Opcode.XOR,  [Param.Register, Param.Register]);
 		AddInstruction("jnz",  Opcode.JNZ,  [Param.Addr]);
 		AddInstruction("jmp",  Opcode.JMP,  [Param.Addr]);
-		AddInstruction("out",  Opcode.OUT,  [Param.Byte, Param.Register]);
-		AddInstruction("in",   Opcode.IN,   [Param.Byte]);
+		AddInstruction("out",  Opcode.OUT,  [Param.Register, Param.Register]);
+		AddInstruction("in",   Opcode.IN,   [Param.Register]);
 		AddInstruction("lda",  Opcode.LDA,  [Param.RegisterPair, Param.Addr]);
 		AddInstruction("incp", Opcode.INCP, [Param.RegisterPair]);
 		AddInstruction("decp", Opcode.DECP, [Param.RegisterPair]);
@@ -71,6 +71,8 @@ class Assembler {
 		AddInstruction("cpp",  Opcode.CPP,  [Param.RegisterPair, Param.RegisterPair]);
 		AddInstruction("jmpb", Opcode.JMPB, [Param.Addr]);
 		AddInstruction("jnzb", Opcode.JNZB, [Param.Addr]);
+		AddInstruction("chk",  Opcode.CHK,  [Param.Register]);
+		AddInstruction("ison", Opcode.ISON, [Param.Register]);
 		AddInstruction("hlt",  Opcode.HLT,  []);
 	}
 

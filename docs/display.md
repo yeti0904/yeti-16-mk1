@@ -9,6 +9,8 @@ Text data is stored in 0x000405 - 0x0013A5
 
 Font data is stored in 0x0013A5 - 0x0025A5
 
+Palette data is stored in 0x0025A5 - 0x25D5
+
 ### 0x01
 80x80 text mode with 8x8 font
 
