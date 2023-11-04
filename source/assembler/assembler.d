@@ -10,6 +10,7 @@ import ydlib.common;
 import yeti16.computer;
 import yeti16.assembler.error;
 import yeti16.assembler.lexer;
+import yeti16.assembler.parser;
 
 enum Param {
 	Register,
@@ -29,7 +30,7 @@ class Assembler {
 	InstructionDef[] defs;
 	ubyte[]          output;
 	size_t           i;
-	Token[]          tokens;
+	Node[]           nodes;
 	uint[string]     labels;
 
 	this() {
@@ -139,13 +140,13 @@ class Assembler {
 	}
 
 	void Error(string str) {
-		ErrorBegin(ErrorInfo(tokens[i].file, tokens[i].line));
+		ErrorBegin(nodes[i].error);
 		stderr.writeln(str);
 	}
 
-	void ExpectType(TokenType type) {
-		if (tokens[i].type != type) {
-			Error(format("Expected %s, got %s", type, tokens[i].type));
+	void ExpectType(NodeType type) {
+		if (nodes[i].type != type) {
+			Error(format("Expected %s, got %s", type, nodes[i].type));
 			exit(1);
 		}
 	}
@@ -153,57 +154,51 @@ class Assembler {
 	void Assemble() {
 		// generate labels
 		uint labelAddr = 0x050000;
-		for (i = 0; i < tokens.length; ++ i) {
-			switch (tokens[i].type) {
-				case TokenType.Label: {
-					if (InstructionExists(tokens[i].contents)) {
+		for (i = 0; i < nodes.length; ++ i) {
+			switch (nodes[i].type) {
+				case NodeType.Label: {
+					auto node = cast(LabelNode) nodes[i];
+				
+					if (InstructionExists(node.name)) {
 						Error("Labels cannot have the same name as an instruction");
 						exit(1);
 					}
 				
-					labels[tokens[i].contents] = labelAddr;
+					labels[node.name] = labelAddr;
 					break;
 				}
-				case TokenType.Identifier: {
-					if (!InstructionExists(tokens[i].contents)) {
+				case NodeType.Instruction: {
+					auto node = cast(InstructionNode) nodes[i];
+				
+					if (!InstructionExists(node.name)) {
 						break;
 					}
 
-
-					labelAddr += GetInstructionSize(tokens[i].contents);
+					labelAddr += GetInstructionSize(node.name);
 					break;
 				}
 				default: break;
 			}
 		}
 	
-		for (i = 0; i < tokens.length; ++ i) {
-			if (tokens[i].type == TokenType.End) {
-				++ i;
-			}
-			if (tokens[i].type == TokenType.Label) {
+		for (i = 0; i < nodes.length; ++ i) {
+			if (nodes[i].type == NodeType.Label) {
 				continue;
 			}
 		
-			ExpectType(TokenType.Identifier);
+			ExpectType(NodeType.Instruction);
 
-			if (!InstructionExists(tokens[i].contents)) {
-				Error(format("No such instruction/keyword '%s'", tokens[i].contents));
+			auto node = cast(InstructionNode) nodes[i];
+
+			if (!InstructionExists(node.name)) {
+				Error(format("No such instruction/keyword '%s'", node.name));
 				exit(1);
 			}
 
-			auto inst  = GetInstruction(tokens[i].contents);
+			auto inst  = GetInstruction(node.name);
 			output    ~= inst.opcode;
 
-			Token[] params;
-
-			++ i;
-			while (tokens[i].type != TokenType.End) {
-				params ~= tokens[i];
-				++ i;
-			}
-
-			if (inst.args.length != params.length) {
+			if (inst.args.length != node.params.length) {
 				Error(
 					format(
 						"Wrong parameter amount for instruction '%s'", inst.name
@@ -217,32 +212,31 @@ class Assembler {
 			
 				final switch (arg) {
 					case Param.Register: {
-						valid = params[i].type == TokenType.Register;
+						valid = node.params[i].type == NodeType.Register;
 						break;
 					}
 					case Param.RegisterPair: {
-						valid = params[i].type == TokenType.RegisterPair;
+						valid = node.params[i].type == NodeType.RegisterPair;
 						break;
 					}
 					case Param.Byte: {
-						valid = params[i].type == TokenType.Integer;
+						valid = node.params[i].type == NodeType.Integer;
 						break;
 					}
 					case Param.Word: {
-						valid = params[i].type == TokenType.Integer;
+						valid = node.params[i].type == NodeType.Integer;
 						break;
 					}
 					case Param.Addr: {
 						valid = (
-							(params[i].type == TokenType.Integer) ||
-							(params[i].type == TokenType.Identifier)
+							(node.params[i].type == NodeType.Integer) ||
+							(node.params[i].type == NodeType.Identifier)
 						);
 						break;
 					}
 				}
 
 				if (!valid) {
-					writeln(params[i]);
 					Error(
 						format(
 							"Parameter %d is invalid for instruction %s", i + 1,
@@ -256,19 +250,27 @@ class Assembler {
 			foreach (i, ref arg ; inst.args) {
 				final switch (arg) {
 					case Param.Register: {
-						output ~= RegisterByte(params[i].contents);
+						auto paramNode = cast(RegisterNode) node.params[i];
+						
+						output ~= RegisterByte(paramNode.name);
 						break;
 					}
 					case Param.RegisterPair: {
-						output ~= RegisterPairByte(params[i].contents);
+						auto paramNode = cast(RegisterPairNode) node.params[i];
+					
+						output ~= RegisterPairByte(paramNode.name);
 						break;
 					}
 					case Param.Byte: {
-						output ~= parse!ubyte(params[i].contents);
+						auto paramNode = cast(IntegerNode) node.params[i];
+					
+						output ~= cast(ubyte) paramNode.value;
 						break;
 					}
 					case Param.Word: {
-						ushort word  = parse!ushort(params[i].contents);
+						auto paramNode = cast(IntegerNode) node.params[i];
+					
+						ushort word  = cast(ushort) paramNode.value;
 						output      ~= cast(ubyte) (word & 0xFF);
 						output      ~= cast(ubyte) ((word & 0xFF00) >> 8);
 						break;
@@ -276,18 +278,17 @@ class Assembler {
 					case Param.Addr: {
 						uint addr;
 						
-						switch (params[i].type) {
-							case TokenType.Integer: {
-								addr = parse!int(params[i].contents);
+						switch (node.params[i].type) {
+							case NodeType.Integer: {
+								auto paramNode = cast(IntegerNode) node.params[i];
+								
+								addr = paramNode.value;
 								break;
 							}
-							case TokenType.Identifier: {
-								if (InstructionExists(params[i].contents)) {
-									Error("Instruction name as identifier");
-									exit(1);
-								}
+							case NodeType.Identifier: {
+								auto paramNode = cast(IdentifierNode) node.params[i];
 							
-								addr = labels[params[i].contents];
+								addr = labels[paramNode.name];
 								break;
 							}
 							default: assert(0);
@@ -308,6 +309,7 @@ int AssemblerCLI(string[] args) {
 	string inFile;
 	string outFile = "out.bin";
 	bool   debugLexer;
+	bool   debugParser;
 
 	for (size_t i = 0; i < args.length; ++ i) {
 		if (args[i][0] == '-') {
@@ -320,6 +322,11 @@ int AssemblerCLI(string[] args) {
 				case "-t":
 				case "--tokens": {
 					debugLexer = true;
+					break;
+				}
+				case "-a":
+				case "--parser": {
+					debugParser = true;
 					break;
 				}
 				default: {
@@ -351,7 +358,16 @@ int AssemblerCLI(string[] args) {
 		return 0;
 	}
 
-	assembler.tokens = lexer.tokens;
+	auto parser = new Parser();
+	parser.tokens = lexer.tokens;
+	parser.Parse();
+
+	if (debugParser) {
+		parser.PrintNodes();
+		return 0;
+	}
+
+	assembler.nodes = parser.nodes;
 	assembler.Assemble();
 	std.file.write(outFile, assembler.output);
 	return 0;

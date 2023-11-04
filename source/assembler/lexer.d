@@ -117,7 +117,17 @@ class Lexer {
 						break;
 					}
 					case ';': {
-						while ((i < src.length) && (src[i] != '\n')) ++ i;
+						while ((i < src.length) && (src[i] != '\n')) {
+							++ i;
+
+							if (src[i] == '\n') {
+								++ line;
+								col = 0;
+							}
+							else {
+								++ col;
+							}
+						}
 						break;
 					}
 					default: {

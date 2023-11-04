@@ -221,6 +221,10 @@ class Computer {
 		ram[addr + 2] = cast(ubyte) ((value & 0xFF0000) >> 16);
 	}
 
+	bool InterruptEnabled(ubyte interrupt) {
+		return ram[4 + (interrupt * 4)] == 0? false : true;
+	}
+
 	void CallInterrupt(ubyte interrupt) {
 		uint interruptAddr = 4 + (interrupt * 4);
 
