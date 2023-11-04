@@ -1,3 +1,6 @@
+set a 2
+set b 80
+out a b
 lda ds 1029
 set c 64000
 

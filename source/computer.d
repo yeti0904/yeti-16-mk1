@@ -137,15 +137,20 @@ class Computer {
 
 		// initialise display stuff
 		ram[0x000404] = 0x10; // 320x200 8bpp
-		for (uint i = 0; i < cast(uint) palette.length; ++ i) {
-			ram[0x00FE05 + i] = palette[i];
-		}
 
 		// initialise devices
 		import yeti16.devices.debugDevice;
 		import yeti16.devices.keyboard;
+		import yeti16.devices.graphicsController;
 		devices[0] = new Debug();
 		devices[1] = new Keyboard();
+		devices[2] = new GraphicsController();
+
+		foreach (ref dev ; devices) {
+			if (dev is null) continue;
+
+			dev.computer = this;
+		}
 	}
 
 	ubyte NextByte() {

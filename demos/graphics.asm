@@ -1,3 +1,6 @@
+set a 2
+set b 80
+out a b
 set f 0
 set d 65535
 set b 0

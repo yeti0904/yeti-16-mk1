@@ -1,8 +1,10 @@
 module yeti16.deviceBase;
 
 import bindbc.sdl;
+import yeti16.computer;
 
 class Device {
+	Computer computer;
 	string   name;
 	ushort[] data; // read with IN
 
