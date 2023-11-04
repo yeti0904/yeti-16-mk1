@@ -11,6 +11,7 @@ DS (24-bit)
 SR (24-bit)
 IP (24-bit)
 SP (24-bit)
+BS (24-bit)
 
 ## Instruction format
 Opcode is a byte (8-bit), and then parameters after are either bytes for data or
@@ -63,4 +64,7 @@ registers, words (16-bit) for data, and 24-bit values for addresses
                             and stores the value in AB
 - `CPR (reg) (reg)` (0x21) - Copies the value of the second register to the first register
 - `CPP (reg pair) (reg pair)` (0x22) - Same as CPR but for register pairs
+- `JMPB (addr)` (0x23) - Jumps to the given address added to the value of `BS`
+- `JNZB (addr)` (0x24) - Jumps to the given address added to the value of `BS` if
+                         the value of `A` isn't 0
 - `HLT` (0xFF) - Stops execution

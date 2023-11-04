@@ -7,9 +7,9 @@ loop:
 	mod b d
 	set d 0
 	cmp b d
-	jnz draw_black
+	jnzb draw_black
 	set b 15
-	jmp next
+	jmpb next
 
 draw_black:
 	set b 0
@@ -20,8 +20,8 @@ next:
 	dec c
 	set b 0
 	cmp c b
-	jnz end
-	jmp loop
+	jnzb end
+	jmpb loop
 
 end:
-	jmp end
+	jmpb end

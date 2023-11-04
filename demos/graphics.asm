@@ -2,7 +2,7 @@ set f 0
 set d 65535
 set b 0
 
-jmp nextIt
+jmpb nextIt
 
 loop:
 	dec d
@@ -10,7 +10,7 @@ loop:
 	; uncomment the following code if you want to see every colour ever flash in front
 	; of you, so consider this an epilepsy warning
 	;jnz nextIt
-	jmp loop
+	jmpb loop
 
 nextIt:
 	lda ds 1029
@@ -18,4 +18,4 @@ nextIt:
 	setl f
 	inc f
 	set d 100
-	jmp loop
+	jmpb loop

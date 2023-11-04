@@ -49,6 +49,8 @@ enum Opcode {
 	RDA  = 0x20,
 	CPR  = 0x21,
 	CPP  = 0x22,
+	JMPB = 0x23,
+	JNZB = 0x24,
 	HLT  = 0xFF
 }
 
@@ -66,7 +68,8 @@ enum RegPair {
 	CD = 1,
 	EF = 2,
 	DS = 3,
-	SR = 4
+	SR = 4,
+	BS = 5
 }
 
 class ComputerException : Exception {
@@ -93,6 +96,7 @@ class Computer {
 	uint   sr;
 	uint   ip;
 	uint   sp;
+	uint   bs;
 
 	this() {
 		ram    = new ubyte[](Computer.ramSize);
@@ -182,17 +186,19 @@ class Computer {
 			}
 			case RegPair.DS: ds = value; break;
 			case RegPair.SR: sr = value; break;
+			case RegPair.BS: bs = value; break;
 			default: throw new ComputerException(format("Invalid register %X", reg));
 		}
 	}
 
 	uint ReadRegPair(ubyte reg) {
 		switch (reg) {
-			case RegPair.AB:  return cast(ubyte) ((a << 16) | b);
-			case RegPair.CD:  return cast(ubyte) ((c << 16) | d);
-			case RegPair.EF:  return cast(ubyte) ((e << 16) | f);
-			case RegPair.DS:  return ds;
-			case RegPair.SR:  return sr;
+			case RegPair.AB: return cast(ubyte) ((a << 16) | b);
+			case RegPair.CD: return cast(ubyte) ((c << 16) | d);
+			case RegPair.EF: return cast(ubyte) ((e << 16) | f);
+			case RegPair.DS: return ds;
+			case RegPair.SR: return sr;
+			case RegPair.BS: return bs;
 			default: throw new ComputerException(format("Invalid register %X", reg));
 		}
 	}
@@ -446,6 +452,19 @@ class Computer {
 				auto reg1 = NextByte();
 				auto reg2 = NextByte();
 				WriteRegPair(reg1, ReadRegPair(reg2));
+				break;
+			}
+			case Opcode.JMPB: {
+				auto addr = NextAddr();
+				ip        = bs + addr;
+				break;
+			}
+			case Opcode.JNZB: {
+				auto addr = NextAddr();
+
+				if (a != 0) {
+					ip = bs + addr;
+				}
 				break;
 			}
 			case Opcode.HLT: {

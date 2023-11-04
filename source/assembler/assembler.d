@@ -69,6 +69,8 @@ class Assembler {
 		AddInstruction("rda",  Opcode.RDA,  [Param.RegisterPair]);
 		AddInstruction("cpr",  Opcode.CPR,  [Param.Register, Param.Register]);
 		AddInstruction("cpp",  Opcode.CPP,  [Param.RegisterPair, Param.RegisterPair]);
+		AddInstruction("jmpb", Opcode.JMPB, [Param.Addr]);
+		AddInstruction("jnzb", Opcode.JNZB, [Param.Addr]);
 		AddInstruction("hlt",  Opcode.HLT,  []);
 	}
 
@@ -153,7 +155,8 @@ class Assembler {
 
 	void Assemble() {
 		// generate labels
-		uint labelAddr = 0x050000;
+		uint labelBase = 0x050000;
+		uint labelAddr = labelBase;
 		for (i = 0; i < nodes.length; ++ i) {
 			switch (nodes[i].type) {
 				case NodeType.Label: {
@@ -283,6 +286,10 @@ class Assembler {
 								auto paramNode = cast(IntegerNode) node.params[i];
 								
 								addr = paramNode.value;
+
+								if ((inst.name == "jmpb") || (inst.name == "jnzb")) {
+									addr -= labelBase;
+								}
 								break;
 							}
 							case NodeType.Identifier: {

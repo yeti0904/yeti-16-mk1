@@ -1,2 +1,2 @@
 loop:
-	jmp loop
+	jmpb loop
