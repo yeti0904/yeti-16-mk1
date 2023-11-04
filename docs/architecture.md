@@ -1,17 +1,17 @@
 # Architecture
 
 ## Registers
-A  (16-bit)
-B  (16-bit)
-C  (16-bit)
-D  (16-bit)
-E  (16-bit)
-F  (16-bit) 
-DS (24-bit)
-SR (24-bit)
-IP (24-bit)
-SP (24-bit)
-BS (24-bit)
+- A  (16-bit)
+- B  (16-bit)
+- C  (16-bit)
+- D  (16-bit)
+- E  (16-bit)
+- F  (16-bit) 
+- DS (24-bit)
+- SR (24-bit)
+- IP (24-bit)
+- SP (24-bit)
+- BS (24-bit)
 
 ## Instruction format
 Opcode is a byte (8-bit), and then parameters after are either bytes for data or
