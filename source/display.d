@@ -21,7 +21,7 @@ class Display {
 
 	void Init() {
 		version (Windows) {
-			auto res = loadSDL(dirName(thisExePath()) ~ "/sdl2.dll");
+			auto res = loadSDL(format("%s/sdl2.dll", dirName(thisExePath())).toStringz());
 		}
 		else {
 			auto res = loadSDL();
