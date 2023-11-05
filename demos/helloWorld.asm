@@ -9,6 +9,7 @@ set a 2
 set b 70
 out a b
 
+; the assembler has no way to store data so this is the best i can do for now
 lda ds 1029
 set c 1600
 set a 32

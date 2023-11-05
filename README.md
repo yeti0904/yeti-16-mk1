@@ -1,5 +1,5 @@
 # YETI-16
-![Lines demo](/screenshots/lines.png)
+![Lines demo](/screenshots/hello_world.png)
 
 16-bit fantasy computer
 
