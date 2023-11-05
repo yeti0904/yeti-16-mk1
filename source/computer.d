@@ -107,6 +107,7 @@ class Computer {
 	ubyte[]     ram;
 	bool        halted;
 	Device[256] devices;
+	Display     display;
 
 	// registers
 	ushort a;
@@ -592,6 +593,7 @@ int ComputerCLI(string[] args) {
 	
 	auto computer = new Computer();
 	display.computer = computer;
+	computer.display = display;
 
 	ubyte[] program = [0x14, 0x00, 0x00, 0x05];
 

@@ -33,3 +33,8 @@ and then it returns data in this format
 This is a device for loading default palettes and fonts
 
 The default palette can be loaded by sending the ASCII character `P`
+
+The default text mode font can be loaded by sending the ASCII character `F`
+
+After setting the video mode at `0x000404`, you need to update the display by sending
+the ASCII character `M` to the YETI-16 Graphics Controller
