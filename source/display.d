@@ -91,12 +91,19 @@ class Display {
 		bool  dead        = false;
 
 		switch (videoMode) {
+			case 0x00:
 			case 0x01: {
 				uint      textAddr;
 				uint      fontAddr;
 				Vec2!uint cellDim;
 
 				final switch (videoMode) {
+					case 0x00: {
+						textAddr = 0x000405;
+						fontAddr = 0x001085;
+						cellDim  = Vec2!uint(80, 40);
+						break;
+					}
 					case 0x01: {
 						textAddr = 0x000405;
 						fontAddr = 0x000A45;

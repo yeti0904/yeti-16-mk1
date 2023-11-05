@@ -30,13 +30,31 @@ class GraphicsController : Device {
 				break;
 			}
 			case 'F': {
+				uint fontAddr = 0x000A45;
+
+				switch (computer.ram[0x000404]) {
+					case 0x00: {
+						fontAddr = 0x001085;
+						break;
+					}
+					case 0x01: {
+						fontAddr = 0x000A45;
+						break;
+					}
+					default: break;
+				}
+				
 				for (uint i = 0; i < cast(uint) font8x8.length; ++ i) {
-					computer.ram[0x000A45 + i] = font8x8[i];
+					computer.ram[fontAddr + i] = font8x8[i];
 				}
 				break;
 			}
 			case 'M': {
 				switch (computer.ram[0x000404]) {
+					case 0x00: {
+						computer.display.resolution = Vec2!int(80 * 8, 40 * 8);
+						break;
+					}
 					case 0x01: {
 						computer.display.resolution = Vec2!int(40 * 8, 40 * 8);
 						break;

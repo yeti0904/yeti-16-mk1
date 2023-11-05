@@ -6,14 +6,14 @@ the ASCII character `M` to the YETI-16 Graphics Controller
 
 ## Video modes
 
-### 0x00 (NOT IMPLEMENTED)
-80x25 text mode with 9x16 font
+### 0x00
+80x40 text mode with 8x8 font
 
-Text data is stored in 0x000405 - 0x0013A5
+Text data is stored in 0x000405 - 0x001085
 
-Font data is stored in 0x0013A5 - 0x0025A5
+Font data is stored in 0x001085 - 0x001885
 
-Palette data is stored in 0x0025A5 - 0x25D5
+Palette data is stored in 0x001885 - 0x0018B5
 
 ### 0x01
 40x40 text mode with 8x8 font

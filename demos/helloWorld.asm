@@ -1,6 +1,6 @@
 ; change to text mode (40x40 cells, 8x8 font)
 lda ds 1028
-set a 1
+set a 0
 wrb ds a
 set a 2
 set b 77
@@ -11,7 +11,7 @@ out a b
 
 ; the assembler has no way to store data so this is the best i can do for now
 lda ds 1029
-set c 1600
+set c 3200
 set a 32
 setl a
 lda ds 1029
