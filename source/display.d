@@ -1,5 +1,6 @@
 module yeti16.display;
 
+import std.file;
 import std.path;
 import std.stdio;
 import std.string;
