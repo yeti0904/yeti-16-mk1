@@ -18,7 +18,14 @@ class Display {
 	}
 
 	void Init() {
-		if (loadSDL() != sdlSupport) {
+		version (Windows) {
+			auto res = loadSDL(dirName(thisExePath()) ~ "/sdl2.dll");
+		}
+		else {
+			auto res = loadSDL();
+		}
+	
+		if (res != sdlSupport) {
 			stderr.writeln("No SDL support");
 			exit(1);
 		}
