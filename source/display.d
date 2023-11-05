@@ -92,19 +92,30 @@ class Display {
 
 		switch (videoMode) {
 			case 0x01: {
-				if (resolution != Vec2!int(40 * 8, 40 * 8)) {
+				uint      textAddr;
+				uint      fontAddr;
+				Vec2!uint cellDim;
+
+				final switch (videoMode) {
+					case 0x01: {
+						textAddr = 0x000405;
+						fontAddr = 0x000A45;
+						cellDim  = Vec2!uint(40, 40);
+						break;
+					}
+				}
+
+				auto expectedRes = Vec2!int(
+					cast(int) cellDim.x * 8, cast(int) cellDim.y * 8
+				);
+				if (resolution != expectedRes) {
 					deathColour = SDL_Color(0, 0, 255, 255);
 					goto default;
 				}
-
-				// TODO: use the font in memory
-
-				const uint textAddr = 0x000405;
-				const uint fontAddr = 0x000A45;
 			
-				for (uint y = 0; y < 40; ++ y) {
-					for (uint x = 0; x < 40; ++ x) {
-						uint    chAddr = textAddr + (y * 40) + x;
+				for (uint y = 0; y < cellDim.y; ++ y) {
+					for (uint x = 0; x < cellDim.x; ++ x) {
+						uint    chAddr = textAddr + (y * cellDim.x) + x;
 						char    ch     = computer.ram[chAddr];
 						ubyte[] chFont = computer.ram[
 							fontAddr + (ch * 8) .. fontAddr + ((ch * 8) + 8)
