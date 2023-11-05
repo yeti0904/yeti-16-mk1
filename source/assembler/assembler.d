@@ -72,7 +72,7 @@ class Assembler {
 		AddInstruction("jmpb", Opcode.JMPB, [Param.Addr]);
 		AddInstruction("jnzb", Opcode.JNZB, [Param.Addr]);
 		AddInstruction("chk",  Opcode.CHK,  [Param.Register]);
-		AddInstruction("ison", Opcode.ISON, [Param.Register]);
+		AddInstruction("actv", Opcode.ACTV, [Param.Register]);
 		AddInstruction("hlt",  Opcode.HLT,  []);
 	}
 

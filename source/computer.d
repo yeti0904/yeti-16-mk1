@@ -54,7 +54,7 @@ enum Opcode {
 	JMPB = 0x23,
 	JNZB = 0x24,
 	CHK  = 0x25,
-	ISON = 0x26,
+	ACTV = 0x26,
 	HLT  = 0xFF
 }
 
@@ -571,7 +571,7 @@ class Computer {
 				a = device.data.length == 0? 0 : 0xFFFF;
 				break;
 			}
-			case Opcode.ISON: {
+			case Opcode.ACTV: {
 				auto dev = ReadReg(NextByte()) & 0xFF;
 
 				a = devices[dev] is null? 0 : 0xFFFF;

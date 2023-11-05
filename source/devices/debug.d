@@ -20,6 +20,8 @@ class Debug : Device {
 		else {
 			switch (dataIn) {
 				case 'Q': {
+					data ~= cast(ushort) 'Q';
+				
 					foreach (ref ch ; name) {
 						data ~= cast(ushort) ch;
 					}

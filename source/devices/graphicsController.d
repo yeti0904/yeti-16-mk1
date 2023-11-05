@@ -12,6 +12,8 @@ class GraphicsController : Device {
 	override void Out(ushort dataIn) {
 		switch (dataIn) {
 			case 'Q': {
+				data ~= cast(ushort) 'Q';
+			
 				foreach (ref ch ; name) {
 					data ~= cast(ushort) ch;
 				}
