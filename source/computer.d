@@ -612,9 +612,10 @@ int ComputerCLI(string[] args) {
 	}
 
 	foreach (i, ref b ; program) {
-		computer.ram[0x50000 + i] = b;
+		computer.ram[0x050000 + i] = b;
 	}
-	computer.ip = 0x50000;
+	computer.ip = 0x050000;
+	computer.bs = 0x050000;
 
 	ulong  ticks;
 	double frameTimeGoal = 1000 / 60;

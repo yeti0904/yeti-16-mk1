@@ -288,16 +288,16 @@ class Assembler {
 								auto paramNode = cast(IntegerNode) node.params[i];
 								
 								addr = paramNode.value;
-
-								if ((inst.name == "jmpb") || (inst.name == "jnzb")) {
-									addr -= labelBase;
-								}
 								break;
 							}
 							case NodeType.Identifier: {
 								auto paramNode = cast(IdentifierNode) node.params[i];
 							
 								addr = labels[paramNode.name];
+
+								if ((inst.name == "jmpb") || (inst.name == "jnzb")) {
+									addr -= labelBase;
+								}
 								break;
 							}
 							default: assert(0);
