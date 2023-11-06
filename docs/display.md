@@ -15,6 +15,8 @@ Font data is stored in 0x001085 - 0x001885
 
 Palette data is stored in 0x001885 - 0x0018B5
 
+Attribute data is stored in 0x0018B5 - 0x002535
+
 ### 0x01
 40x40 text mode with 8x8 font
 
@@ -23,6 +25,8 @@ Text data is stored in 0x000405 - 0x000A45
 Font data is stored in 0x000A45 - 0x001245
 
 Palette data is stored in 0x001245 - 0x001275
+
+Attribute data is stored in 0x001275 - 0x0018B5
 
 ### 0x10
 320x200 video mode with 8bpp

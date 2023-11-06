@@ -1,5 +1,6 @@
 module yeti16.devices.graphicsController;
 
+import std.stdio;
 import bindbc.sdl;
 import yeti16.fonts;
 import yeti16.types;
@@ -24,13 +25,35 @@ class GraphicsController : Device {
 				break;
 			}
 			case 'P': {
+				uint    paletteAddr;
+				ubyte[] palette;
+
+				switch (computer.ram[0x000404]) {
+					case 0x00: {
+						paletteAddr = 0x001885;
+						palette     = cast(ubyte[]) palette16;
+						break;
+					}
+					case 0x01: {
+						paletteAddr = 0x001245;
+						palette     = cast(ubyte[]) palette16;
+						break;
+					}
+					case 0x10: {
+						paletteAddr = 0x00FE05;
+						palette     = cast(ubyte[]) palette256;
+						break;
+					}
+					default:   return;
+				}
+			
 				for (uint i = 0; i < cast(uint) palette.length; ++ i) {
-					computer.ram[0x00FE05 + i] = palette[i];
+					computer.ram[paletteAddr + i] = palette[i];
 				}
 				break;
 			}
 			case 'F': {
-				uint fontAddr = 0x000A45;
+				uint fontAddr;
 
 				switch (computer.ram[0x000404]) {
 					case 0x00: {
@@ -41,7 +64,7 @@ class GraphicsController : Device {
 						fontAddr = 0x000A45;
 						break;
 					}
-					default: break;
+					default: return;
 				}
 				
 				for (uint i = 0; i < cast(uint) font8x8.length; ++ i) {

@@ -94,20 +94,26 @@ class Display {
 			case 0x00:
 			case 0x01: {
 				uint      textAddr;
+				uint      attrAddr;
 				uint      fontAddr;
+				uint      paletteAddr;
 				Vec2!uint cellDim;
 
 				final switch (videoMode) {
 					case 0x00: {
-						textAddr = 0x000405;
-						fontAddr = 0x001085;
-						cellDim  = Vec2!uint(80, 40);
+						textAddr    = 0x000405;
+						attrAddr    = 0x0018B5;
+						fontAddr    = 0x001085;
+						paletteAddr = 0x001885;
+						cellDim     = Vec2!uint(80, 40);
 						break;
 					}
 					case 0x01: {
-						textAddr = 0x000405;
-						fontAddr = 0x000A45;
-						cellDim  = Vec2!uint(40, 40);
+						textAddr    = 0x000405;
+						attrAddr    = 0x001275;
+						fontAddr    = 0x000A45;
+						paletteAddr = 0x001245;
+						cellDim     = Vec2!uint(40, 40);
 						break;
 					}
 				}
@@ -127,6 +133,21 @@ class Display {
 						ubyte[] chFont = computer.ram[
 							fontAddr + (ch * 8) .. fontAddr + ((ch * 8) + 8)
 						];
+						ubyte attr  = computer.ram[attrAddr + (y * cellDim.x) + x];
+						uint  fgCol = attr & 0x0F;
+						uint  bgCol = (attr & 0xF0) >> 4;
+
+						auto fg = SDL_Color(
+							computer.ram[paletteAddr + (fgCol * 3)],
+							computer.ram[paletteAddr + (fgCol * 3) + 1],
+							computer.ram[paletteAddr + (fgCol * 3) + 2],
+							255
+						);
+						auto bg = SDL_Color(
+							computer.ram[paletteAddr + (bgCol * 3)],
+							computer.ram[paletteAddr + (bgCol * 3) + 1],
+							computer.ram[paletteAddr + (bgCol * 3) + 2]
+						);
 
 						for (uint cx = 0; cx < 8; ++ cx) {
 							for (uint cy = 0; cy < 8; ++ cy) {
@@ -135,10 +156,10 @@ class Display {
 								ubyte set = chFont[cy] & (1 << cx);
 
 								if (set) {
-									DrawPixel(pixelPos.x, pixelPos.y, 255, 255, 255);
+									DrawPixel(pixelPos.x, pixelPos.y, fg.r, fg.g, fg.b);
 								}
 								else {
-									DrawPixel(pixelPos.x, pixelPos.y, 0, 0, 0);
+									DrawPixel(pixelPos.x, pixelPos.y, bg.r, bg.g, bg.b);
 								}
 							}
 						}

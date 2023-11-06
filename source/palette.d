@@ -1,9 +1,30 @@
 module yeti16.palette;
 
+// just the VGA palette from lxterminal
+
+const ubyte[] palette16 = [
+	/* 0x0 */ 0,   0,   0,
+	/* 0x1 */ 205, 0,   0,
+	/* 0x2 */ 0,   205, 0,
+	/* 0x3 */ 205, 205, 0,
+	/* 0x4 */ 0,   0,   238,
+	/* 0x5 */ 205, 0,   205,
+	/* 0x6 */ 0,   205, 205,
+	/* 0x7 */ 229, 229, 229,
+	/* 0x8 */ 127, 127, 127,
+	/* 0x9 */ 255, 0,   0,
+	/* 0xA */ 0,   255, 0,
+	/* 0xB */ 255, 255, 0,
+	/* 0xC */ 92,  92,  255,
+	/* 0xD */ 255, 0,   255,
+	/* 0xE */ 0,   255, 255,
+	/* 0xF */ 255, 255, 255
+];
+
 // just the VGA palette
 // from a .gpl file at https://opengameart.org/content/vga-colour-palette
 
-const ubyte[] palette = [
+const ubyte[] palette256 = [
 	  0,   0,   0,
 	  0,   0, 170,
 	  0, 170,   0,
