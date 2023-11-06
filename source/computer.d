@@ -73,7 +73,9 @@ enum RegPair {
 	EF = 2,
 	DS = 3,
 	SR = 4,
-	BS = 5
+	BS = 5,
+	IP = 6,
+	SP = 7
 }
 
 enum ErrorInterrupt {
@@ -138,6 +140,11 @@ class Computer {
 
 		// initialise display stuff
 		ram[0x000404] = 0x10; // 320x200 8bpp
+
+		// initialise interrupt table
+		for (uint i = 0x000004; i < 0x000404; ++ i) {
+			ram[i] = 0;
+		}
 
 		// initialise devices
 		import yeti16.devices.debugDevice;
@@ -225,6 +232,8 @@ class Computer {
 			case RegPair.DS: ds = value; break;
 			case RegPair.SR: sr = value; break;
 			case RegPair.BS: bs = value; break;
+			case RegPair.IP: ip = value; break;
+			case RegPair.SP: sp = value; break;
 			default:         Error(ErrorInterrupt.BadParam);
 		}
 	}
@@ -243,6 +252,8 @@ class Computer {
 			case RegPair.DS: return ds;
 			case RegPair.SR: return sr;
 			case RegPair.BS: return bs;
+			case RegPair.IP: return ip;
+			case RegPair.SP: return sp;
 			default: {
 				Error(ErrorInterrupt.BadParam);
 				return 0;
@@ -686,9 +697,9 @@ int ComputerCLI(string[] args) {
 				stderr.writeln("===============");
 				stderr.writefln(
 					"A: %X\nB: %X\nC: %X\nD: %X\nE: %X\nF: %X\nDS: %X\nSR: %X\n" ~
-					"IP: %X\nSP: %X",
+					"IP: %X\nSP: %X\nBS: %X",
 					computer.a, computer.b, computer.c, computer.d, computer.e, computer.f,
-					computer.ds, computer.sr, computer.ip, computer.sp
+					computer.ds, computer.sr, computer.ip, computer.sp, computer.bs
 				);
 				writeln(e);
 				return 1;
