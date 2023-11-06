@@ -165,6 +165,16 @@ class Parser {
 			case TokenType.String: {
 				return new StringNode(tokens[i].contents, CurrentError());
 			}
+			case TokenType.Hex: {
+				return new IntegerNode(
+					to!int(tokens[i].contents[2 .. $], 16), CurrentError()
+				);
+			}
+			case TokenType.Binary: {
+				return new IntegerNode(
+					to!int(tokens[i].contents[2 .. $], 2), CurrentError()
+				);
+			}
 			default: assert(0);
 		}
 	}

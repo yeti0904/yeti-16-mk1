@@ -3,6 +3,7 @@ module yeti16.assembler.lexer;
 import std.array;
 import std.string;
 import std.algorithm;
+import yeti16.util;
 import yeti16.assembler.language;
 
 enum TokenType {
@@ -13,6 +14,8 @@ enum TokenType {
 	Integer,
 	String,
 	Label,
+	Hex,
+	Binary,
 	End
 }
 
@@ -49,6 +52,12 @@ class Lexer {
 		}
 		else if (Language.registerPairs.canFind(reading)) {
 			AddToken(TokenType.RegisterPair);
+		}
+		else if (reading.IsHex()) {
+			AddToken(TokenType.Hex);
+		}
+		else if (reading.IsBinary()) {
+			AddToken(TokenType.Binary);
 		}
 		else if (reading.isNumeric()) {
 			AddToken(TokenType.Integer);
