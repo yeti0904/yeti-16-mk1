@@ -231,9 +231,15 @@ class Computer {
 
 	uint ReadRegPair(ubyte reg) {
 		switch (reg) {
-			case RegPair.AB: return cast(ubyte) ((a << 16) | b);
-			case RegPair.CD: return cast(ubyte) ((c << 16) | d);
-			case RegPair.EF: return cast(ubyte) ((e << 16) | f);
+			case RegPair.AB: {
+				return cast(ubyte) ((cast(uint) (a) << 16) | b);
+			}
+			case RegPair.CD: {
+				return cast(ubyte) ((cast(uint) (c) << 16) | d);
+			}
+			case RegPair.EF: {
+				return cast(ubyte) ((cast(uint) (e) << 16) | f);
+			}
 			case RegPair.DS: return ds;
 			case RegPair.SR: return sr;
 			case RegPair.BS: return bs;
