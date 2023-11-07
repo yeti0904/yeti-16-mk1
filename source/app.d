@@ -4,6 +4,8 @@ import yeti16.computer;
 import yeti16.assembler.assembler;
 
 const string appHelp = "
+YETI-16 beta 1.0.0
+
 Usage: %s {operation} [args]
 
 Operations:
@@ -30,6 +32,8 @@ int main(string[] args) {
 		case "run": {
 			return ComputerCLI(args[2 .. $]);
 		}
+		case "version":
+		case "--version":
 		case "help":
 		case "--help": {
 			writefln(appHelp.strip(), args[0]);
