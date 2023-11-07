@@ -14,6 +14,7 @@ import yeti16.util;
 import yeti16.display;
 import yeti16.palette;
 import yeti16.deviceBase;
+import yeti16.devices.disk;
 
 enum Opcode {
 	NOP  = 0x00,
@@ -614,9 +615,28 @@ int ComputerCLI(string[] args) {
 
 	ubyte[] program = [0x14, 0x00, 0x00, 0x05];
 
+	ubyte deviceTop = 0x16;
+
 	for (size_t i = 0; i < args.length; ++ i) {
 		if (args[i][0] == '-') {
 			switch (args[i]) {
+				case "-d":
+				case "--disk": {
+					++ i;
+					Disk disk;
+
+					try {
+						disk = new Disk(args[i]);
+					}
+					catch (DiskException e) {
+						stderr.writeln(e.msg);
+						return 1;
+					}
+
+					computer.devices[deviceTop] = disk;
+					++ deviceTop;
+					break;
+				}
 				default: {
 					stderr.writefln("Unknown flag '%s'", args[i]);
 					return 1;

@@ -6,6 +6,6 @@ class Language {
 	];
 
 	static const string[] registerPairs = [
-		"ab", "cd", "ef", "ds", "sr"
+		"ab", "cd", "ef", "ds", "sr", "bs", "sp", "ip"
 	];
 }

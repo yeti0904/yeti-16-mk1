@@ -1,10 +1,11 @@
 import std.stdio;
 import std.string;
 import yeti16.computer;
+import yeti16.diskUtils;
 import yeti16.assembler.assembler;
 
 const string appHelp = "
-YETI-16 beta 1.0.0
+YETI-16 beta 1.1.0
 
 Usage: %s {operation} [args]
 
@@ -15,6 +16,9 @@ Operations:
 
 	run {file}
 		Runs the given file in the emulator
+
+	new_disk {file} {size}
+		Creates a disk of {size} sectors and saves it in {file}
 ";
 
 int main(string[] args) {
@@ -31,6 +35,9 @@ int main(string[] args) {
 		}
 		case "run": {
 			return ComputerCLI(args[2 .. $]);
+		}
+		case "new_disk": {
+			return CreateDiskCLI(args[2 .. $]);
 		}
 		case "version":
 		case "--version":
