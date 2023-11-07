@@ -126,6 +126,8 @@ class Lexer {
 						break;
 					}
 					case ';': {
+						AddToken(TokenType.End);
+						
 						while ((i < src.length) && (src[i] != '\n')) {
 							++ i;
 
