@@ -5,7 +5,7 @@ import yeti16.diskUtils;
 import yeti16.assembler.assembler;
 
 const string appHelp = "
-YETI-16 beta 1.1.0
+YETI-16 beta 1.2.0
 
 Usage: %s {operation} [args]
 
