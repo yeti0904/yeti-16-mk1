@@ -1,6 +1,7 @@
 module yeti16.computer;
 
 import std.file;
+import std.math;
 import std.stdio;
 import std.format;
 import std.random;
@@ -56,6 +57,9 @@ enum Opcode {
 	JNZB = 0x24,
 	CHK  = 0x25,
 	ACTV = 0x26,
+	ADDP = 0x27,
+	SUBP = 0x28,
+	DIFF = 0x29,
 	HLT  = 0xFF
 }
 
@@ -594,6 +598,31 @@ class Computer {
 				auto dev = ReadReg(NextByte()) & 0xFF;
 
 				a = devices[dev] is null? 0 : 0xFFFF;
+				break;
+			}
+			case Opcode.ADDP: {
+				auto r1 = NextByte();
+				auto r2 = NextByte();
+				auto v1 = ReadRegPair(r1);
+				auto v2 = ReadReg(r2);
+
+				WriteRegPair(r1, v1 + cast(uint) v2);
+				break;
+			}
+			case Opcode.SUBP: {
+				auto r1 = NextByte();
+				auto r2 = NextByte();
+				auto v1 = ReadRegPair(r1);
+				auto v2 = ReadReg(r2);
+
+				WriteRegPair(r1, v1 - cast(uint) v2);
+				break;
+			}
+			case Opcode.DIFF: {
+				auto v1 = cast(long) ReadRegPair(NextByte());
+				auto v2 = cast(long) ReadRegPair(NextByte());
+
+				WriteRegPair(RegPair.AB, cast(uint) abs(v1 - v2));
 				break;
 			}
 			case Opcode.HLT: {

@@ -68,5 +68,10 @@ registers, words (16-bit) for data, and 24-bit values for addresses
 - `JNZB (addr)` (0x24) - Jumps to the given address added to the value of `BS` if
                          the value of `A` isn't 0
 - `CHK (reg)` (0x25) - Checks the given device for any incoming data (0xFFFF if any, 0 if not)
-- `ISON (reg)` (0x26) - Checks to see if the given device is active (0xFFFF if active, 0 if not)
+- `ACTV (reg)` (0x26) - Checks to see if the given device is active (0xFFFF if active, 0 if not)
+- `ADDP (reg pair) (reg)` (0x27) - Adds the contents of reg to the reg pair
+- `SUBP (reg pair) (reg)` (0x28) - Subtracts the contents of the reg from the reg pair
+- `DIFF (reg pair) (reg pair)` (0x29) - Subtracts the contents of the first reg pair from
+                                        the second reg pair and stores the result in
+                                        register pair AB
 - `HLT` (0xFF) - Stops execution

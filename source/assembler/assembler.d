@@ -73,6 +73,9 @@ class Assembler {
 		AddInstruction("jnzb", Opcode.JNZB, [Param.Addr]);
 		AddInstruction("chk",  Opcode.CHK,  [Param.Register]);
 		AddInstruction("actv", Opcode.ACTV, [Param.Register]);
+		AddInstruction("addp", Opcode.ADDP, [Param.RegisterPair, Param.Register]);
+		AddInstruction("subp", Opcode.SUBP, [Param.RegisterPair, Param.Register]);
+		AddInstruction("diff", Opcode.DIFF, [Param.RegisterPair, Param.RegisterPair]);
 		AddInstruction("hlt",  Opcode.HLT,  []);
 	}
 
