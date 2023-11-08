@@ -24,6 +24,7 @@ struct InstructionDef {
 	string  name;
 	ubyte   opcode;
 	Param[] args;
+	bool    special;
 }
 
 class Assembler {
@@ -34,6 +35,7 @@ class Assembler {
 	uint[string]     labels;
 
 	this() {
+		// instructions
 		AddInstruction("nop",  Opcode.NOP,  []);
 		AddInstruction("set",  Opcode.SET,  [Param.Register, Param.Word]);
 		AddInstruction("xchg", Opcode.XCHG, [Param.Register, Param.Register]);
@@ -77,10 +79,19 @@ class Assembler {
 		AddInstruction("subp", Opcode.SUBP, [Param.RegisterPair, Param.Register]);
 		AddInstruction("diff", Opcode.DIFF, [Param.RegisterPair, Param.RegisterPair]);
 		AddInstruction("hlt",  Opcode.HLT,  []);
+
+		// special
+		AddInstruction("db");
+		AddInstruction("dw");
+		AddInstruction("da");
 	}
 
 	void AddInstruction(string name, Opcode opcode, Param[] args) {
-		defs ~= InstructionDef(name, cast(ubyte) opcode, args);
+		defs ~= InstructionDef(name, cast(ubyte) opcode, args, false);
+	}
+
+	void AddInstruction(string name) {
+		defs ~= InstructionDef(name, 0, [], true);
 	}
 
 	bool InstructionExists(string name) {
@@ -207,112 +218,164 @@ class Assembler {
 			}
 
 			auto inst  = GetInstruction(node.name);
-			output    ~= inst.opcode;
 
-			if (inst.args.length != node.params.length) {
-				Error(
-					format(
-						"Wrong parameter amount for instruction '%s'", inst.name
-					)
-				);
-				exit(1);
-			}
+			if (inst.special) {
+				final switch (inst.name) {
+					case "db": {
+						foreach (ref param ; node.params) {
+							switch (param.type) {
+								case NodeType.Integer: {
+									output ~= cast(ubyte) (cast(IntegerNode) param).value;
+									break;
+								}
+								case NodeType.String: {
+									auto str = cast(StringNode) param;
 
-			foreach (i, ref arg ; inst.args) {
-				bool valid;
-			
-				final switch (arg) {
-					case Param.Register: {
-						valid = node.params[i].type == NodeType.Register;
+									foreach (ref ch ; str.value) {
+										output ~= cast(ubyte) ch;
+									}
+									break;
+								}
+								default: {
+									Error(format(
+										"%s can't be used as parameter in db",
+										param.type
+									));
+									exit(1);
+								}
+							}
+						}
 						break;
 					}
-					case Param.RegisterPair: {
-						valid = node.params[i].type == NodeType.RegisterPair;
-						break;
-					}
-					case Param.Byte: {
-						valid = node.params[i].type == NodeType.Integer;
-						break;
-					}
-					case Param.Word: {
-						valid = node.params[i].type == NodeType.Integer;
-						break;
-					}
-					case Param.Addr: {
-						valid = (
-							(node.params[i].type == NodeType.Integer) ||
-							(node.params[i].type == NodeType.Identifier)
-						);
+					case "dw":
+					case "da": {
+						foreach (ref param ; node.params) {
+							switch (param.type) {
+								case NodeType.Integer: {
+									output ~= cast(ubyte) (cast(IntegerNode) param).value;
+									break;
+								}
+								default: {
+									Error(format(
+										"%s can't be used as parameter in %s",
+										param.type, inst.name
+									));
+									exit(1);
+								}
+							}
+						}
 						break;
 					}
 				}
+			}
+			else {
+				output ~= inst.opcode;
 
-				if (!valid) {
+				if (inst.args.length != node.params.length) {
 					Error(
 						format(
-							"Parameter %d is invalid for instruction %s", i + 1,
-							inst.name
+							"Wrong parameter amount for instruction '%s'", inst.name
 						)
 					);
 					exit(1);
 				}
-			}
 
-			foreach (i, ref arg ; inst.args) {
-				final switch (arg) {
-					case Param.Register: {
-						auto paramNode = cast(RegisterNode) node.params[i];
-						
-						output ~= RegisterByte(paramNode.name);
-						break;
-					}
-					case Param.RegisterPair: {
-						auto paramNode = cast(RegisterPairNode) node.params[i];
-					
-						output ~= RegisterPairByte(paramNode.name);
-						break;
-					}
-					case Param.Byte: {
-						auto paramNode = cast(IntegerNode) node.params[i];
-					
-						output ~= cast(ubyte) paramNode.value;
-						break;
-					}
-					case Param.Word: {
-						auto paramNode = cast(IntegerNode) node.params[i];
-					
-						ushort word  = cast(ushort) paramNode.value;
-						output      ~= cast(ubyte) (word & 0xFF);
-						output      ~= cast(ubyte) ((word & 0xFF00) >> 8);
-						break;
-					}
-					case Param.Addr: {
-						uint addr;
-						
-						switch (node.params[i].type) {
-							case NodeType.Integer: {
-								auto paramNode = cast(IntegerNode) node.params[i];
-								
-								addr = paramNode.value;
-								break;
-							}
-							case NodeType.Identifier: {
-								auto paramNode = cast(IdentifierNode) node.params[i];
-							
-								addr = labels[paramNode.name];
-
-								if ((inst.name == "jmpb") || (inst.name == "jnzb")) {
-									addr -= labelBase;
-								}
-								break;
-							}
-							default: assert(0);
+				foreach (i, ref arg ; inst.args) {
+					bool valid;
+				
+					final switch (arg) {
+						case Param.Register: {
+							valid = node.params[i].type == NodeType.Register;
+							break;
 						}
+						case Param.RegisterPair: {
+							valid = node.params[i].type == NodeType.RegisterPair;
+							break;
+						}
+						case Param.Byte: {
+							valid = node.params[i].type == NodeType.Integer;
+							break;
+						}
+						case Param.Word: {
+							valid = node.params[i].type == NodeType.Integer;
+							break;
+						}
+						case Param.Addr: {
+							valid = (
+								(node.params[i].type == NodeType.Integer) ||
+								(node.params[i].type == NodeType.Identifier)
+							);
+							break;
+						}
+					}
 
-						output ~= cast(ubyte) (addr & 0xFF);
-						output ~= cast(ubyte) ((addr & 0xFF00) >> 8);
-						output ~= cast(ubyte) ((addr & 0xFF0000) >> 16);
-						break;
+					if (!valid) {
+						Error(
+							format(
+								"Parameter %d is invalid for instruction %s", i + 1,
+								inst.name
+							)
+						);
+						exit(1);
+					}
+				}
+
+				foreach (i, ref arg ; inst.args) {
+					final switch (arg) {
+						case Param.Register: {
+							auto paramNode = cast(RegisterNode) node.params[i];
+							
+							output ~= RegisterByte(paramNode.name);
+							break;
+						}
+						case Param.RegisterPair: {
+							auto paramNode = cast(RegisterPairNode) node.params[i];
+						
+							output ~= RegisterPairByte(paramNode.name);
+							break;
+						}
+						case Param.Byte: {
+							auto paramNode = cast(IntegerNode) node.params[i];
+						
+							output ~= cast(ubyte) paramNode.value;
+							break;
+						}
+						case Param.Word: {
+							auto paramNode = cast(IntegerNode) node.params[i];
+						
+							ushort word  = cast(ushort) paramNode.value;
+							output      ~= cast(ubyte) (word & 0xFF);
+							output      ~= cast(ubyte) ((word & 0xFF00) >> 8);
+							break;
+						}
+						case Param.Addr: {
+							uint addr;
+							
+							switch (node.params[i].type) {
+								case NodeType.Integer: {
+									auto paramNode = cast(IntegerNode) node.params[i];
+									
+									addr = paramNode.value;
+									break;
+								}
+								case NodeType.Identifier: {
+									auto paramNode = cast(IdentifierNode) node.params[i];
+								
+									addr = labels[paramNode.name];
+
+									if ((inst.name == "jmpb") || (inst.name == "jnzb")) {
+										addr -= labelBase;
+									}
+									break;
+								}
+								default: assert(0);
+							}
+
+							output ~= cast(ubyte) (addr & 0xFF);
+							output ~= cast(ubyte) ((addr & 0xFF00) >> 8);
+							output ~= cast(ubyte) ((addr & 0xFF0000) >> 16);
+							break;
+						}
 					}
 				}
 			}

@@ -88,6 +88,10 @@ class Lexer {
 					case '"': {
 						inString = false;
 						AddToken(TokenType.String);
+
+						if ((i == src.length - 1) || (src[i + 1] == '\n')) {
+							AddToken(TokenType.End);
+						}
 						break;
 					}
 					default: {

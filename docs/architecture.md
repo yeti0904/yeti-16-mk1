@@ -74,4 +74,6 @@ registers, words (16-bit) for data, and 24-bit values for addresses
 - `DIFF (reg pair) (reg pair)` (0x29) - Subtracts the contents of the first reg pair from
                                         the second reg pair and stores the result in
                                         register pair AB
+- `PUSH (reg)` (0x2A) - Pushes the given register to the stack
+- `POP (reg)` (0x2B) - Pops a value from the stack and stores it in the given register
 - `HLT` (0xFF) - Stops execution

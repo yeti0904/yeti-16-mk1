@@ -60,6 +60,8 @@ enum Opcode {
 	ADDP = 0x27,
 	SUBP = 0x28,
 	DIFF = 0x29,
+	PUSH = 0x2A,
+	POP  = 0x2B,
 	HLT  = 0xFF
 }
 
@@ -625,6 +627,18 @@ class Computer {
 				WriteRegPair(RegPair.AB, cast(uint) abs(v1 - v2));
 				break;
 			}
+			case Opcode.PUSH: {
+				auto val = ReadReg(NextByte());
+				WriteWord(sp, val);
+				sp += 2;
+				break;
+			}
+			case Opcode.POP: {
+				auto reg = NextByte();
+				sp -= 2;
+				WriteReg(reg, ReadWord(sp));
+				break;
+			}
 			case Opcode.HLT: {
 				halted = true;
 				break;
@@ -682,6 +696,7 @@ int ComputerCLI(string[] args) {
 	}
 	computer.ip = 0x050000;
 	computer.bs = 0x050000;
+	computer.sp = 0x0F0000;
 
 	ulong  ticks;
 	double frameTimeGoal = 1000 / 60;

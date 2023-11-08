@@ -195,13 +195,21 @@ class Parser {
 				}
 				return ret;
 			}
-			default: assert(0);
+			case TokenType.End: return null;
+			default: {
+				stderr.writefln("ParseStatement: Unexpected type %s", tokens[i].type);
+				assert(0);
+			}
 		}
 	}
 
 	void Parse() {
 		for (i = 0; i < tokens.length; ++ i) {
-			nodes ~= ParseStatement();
+			auto node = ParseStatement();
+
+			if (node !is null) {
+				nodes ~= node;
+			}
 		}
 	}
 
