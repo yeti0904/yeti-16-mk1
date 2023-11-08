@@ -1,7 +1,7 @@
 # YETI-16
 ![Lines demo](/screenshots/hello_world.png)
 
-16-bit fantasy computer
+16-bit fantasy computer, aiming to be low-level yet easy to use
 
 ## Specs
 - 8 MHz CPU
