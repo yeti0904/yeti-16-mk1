@@ -62,6 +62,8 @@ enum Opcode {
 	DIFF = 0x29,
 	PUSH = 0x2A,
 	POP  = 0x2B,
+	JZ   = 0x2C,
+	JZB  = 0x2D,
 	HLT  = 0xFF
 }
 
@@ -637,6 +639,22 @@ class Computer {
 				auto reg = NextByte();
 				sp -= 2;
 				WriteReg(reg, ReadWord(sp));
+				break;
+			}
+			case Opcode.JZ: {
+				auto addr = NextAddr();
+
+				if (a == 0) {
+					ip = addr;
+				}
+				break;
+			}
+			case Opcode.JZB: {
+				auto addr = NextAddr();
+
+				if (a == 0) {
+					ip = bs + addr;
+				}
 				break;
 			}
 			case Opcode.HLT: {

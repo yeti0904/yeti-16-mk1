@@ -3,6 +3,11 @@
 
 16-bit fantasy computer, aiming to be low-level yet easy to use
 
+Unlike the most popular fantasy consoles/computers, YETI-16 uses an emulator instead of
+embedding a scripting language
+
+It also includes an assembler for you to write programs in assembly
+
 ## Specs
 - 8 MHz CPU
 - 16 MiB RAM
@@ -39,7 +44,3 @@ dub build
 ```
 ./yeti-16
 ```
-
-## TODO
-- [ ] more graphics modes
-- [ ] text mode

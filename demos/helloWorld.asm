@@ -22,50 +22,26 @@ lda ds 0x18B5
 set c 3200
 setl a
 
-; the assembler has no way to store data so this is the best i can do for now
+; clear screen
 lda ds 1029
 set c 3200
 set a 32
 setl a
+
+; now to print hello world
 lda ds 1029
-set a 72
-wrb ds a
-incp ds
-set a 101
-wrb ds a
-incp ds
-set a 108
-wrb ds a
-incp ds
-set a 108
-wrb ds a
-incp ds
-set a 111
-wrb ds a
-incp ds
-set a 44
-wrb ds a
-incp ds
-set a 32
-wrb ds a
-incp ds
-set a 119
-wrb ds a
-incp ds
-set a 111
-wrb ds a
-incp ds
-set a 114
-wrb ds a
-incp ds
-set a 108
-wrb ds a
-incp ds
-set a 100
-wrb ds a
-incp ds
-set a 33
-wrb ds a
+lda sr string
 
 loop:
+	rdb sr
+	jz end
+	wrb ds a
+	incp ds
+	incp sr
 	jmp loop
+
+end:
+	jmp end
+
+string:
+	db "hello world" 0
