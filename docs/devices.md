@@ -38,3 +38,16 @@ The default text mode font can be loaded by sending the ASCII character `F`
 
 After setting the video mode at `0x000404`, you need to update the display by sending
 the ASCII character `M` to the YETI-16 Graphics Controller
+
+### YETI-16 Disk
+The YETI-16 Disk has no standard device ID, as it is added by the user at runtime
+
+#### Commands
+- `R (sector number) (amount of sectors to read)`
+Outputs `R` to the input buffer, as well as the sectors you read
+
+- `W (sector number) (512 bytes of data to write)`
+No output, just writes the data to the disk at the location specified by the sector number
+
+- `Q`
+Returns device name
