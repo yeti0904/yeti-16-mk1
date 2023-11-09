@@ -62,7 +62,7 @@ class Disk : Device {
 						uint sectorEnd   = sectorStart + 512;
 
 						for (uint j = sectorStart; j < sectorEnd; ++ j) {
-							data ~= diskData[i];
+							data ~= diskData[j];
 						}
 					}
 					break;
