@@ -83,17 +83,17 @@ class Assembler {
 		AddInstruction("hlt",  Opcode.HLT,  []);
 
 		// special
-		AddInstruction("db");
-		AddInstruction("dw");
-		AddInstruction("da");
+		AddInstruction("db", Param.Byte);
+		AddInstruction("dw", Param.Word);
+		AddInstruction("da", Param.Addr);
 	}
 
 	void AddInstruction(string name, Opcode opcode, Param[] args) {
 		defs ~= InstructionDef(name, cast(ubyte) opcode, args, false);
 	}
 
-	void AddInstruction(string name) {
-		defs ~= InstructionDef(name, 0, [], true);
+	void AddInstruction(string name, Param p) {
+		defs ~= InstructionDef(name, 0, [p], true);
 	}
 
 	bool InstructionExists(string name) {
@@ -116,21 +116,43 @@ class Assembler {
 		assert(0);
 	}
 
-	uint GetInstructionSize(string name) {
-		auto inst = GetInstruction(name);
+	uint GetParamSize(Param p) {
+		switch (p) {
+			case Param.Register:
+			case Param.RegisterPair:
+			case Param.Byte: return 1;
+			case Param.Word: return 2;
+			case Param.Addr: return 3;
+			default: return 0;
+		}
+	}
+
+	uint GetInstructionSizeSpecial(InstructionNode node) {
+		auto inst = GetInstruction(node.name);
+		uint intsize = GetParamSize(inst.args[0]);
+		uint ret = 0;
+
+		foreach (ref param ; node.params) {
+			switch (param.type) {
+				case NodeType.Integer: ret += intsize; break;
+				case NodeType.String:  ret += (cast(StringNode) param).value.length; break; // awful
+				default: break; // should probably add more types here
+			}
+		}
+		return ret;
+	}
+
+	uint GetInstructionSize(InstructionNode node) {
+		auto inst = GetInstruction(node.name);
+
+		if (inst.special) {
+			return GetInstructionSizeSpecial(node);
+		}
+
 		uint ret  = 1;
 
 		foreach (ref param ; inst.args) {
-			final switch (param) {
-				case Param.Register:
-				case Param.RegisterPair:
-				case Param.Byte: {
-					ret += 1;
-					break;
-				}
-				case Param.Word: ret += 2; break;
-				case Param.Addr: ret += 3; break;
-			}
+			ret += GetParamSize(param);
 		}
 
 		return ret;
@@ -198,7 +220,7 @@ class Assembler {
 						break;
 					}
 
-					labelAddr += GetInstructionSize(node.name);
+					labelAddr += GetInstructionSize(node);
 					break;
 				}
 				default: break;
