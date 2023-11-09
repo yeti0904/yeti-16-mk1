@@ -1,6 +1,7 @@
 module yeti16.devices.graphicsController;
 
 import std.stdio;
+import core.stdc.stdlib;
 import bindbc.sdl;
 import yeti16.fonts;
 import yeti16.types;
@@ -73,7 +74,9 @@ class GraphicsController : Device {
 				break;
 			}
 			case 'M': {
-				switch (computer.ram[0x000404]) {
+				ubyte mode = computer.ram[0x000404];
+			
+				switch (mode) {
 					case 0x00: {
 						computer.display.resolution = Vec2!int(80 * 8, 40 * 8);
 						break;
@@ -104,6 +107,15 @@ class GraphicsController : Device {
 					SDL_TEXTUREACCESS_STREAMING, computer.display.resolution.x,
 					computer.display.resolution.y
 				);
+
+				if (computer.display.texture is null) {
+					stderr.writefln(
+						"Failed to create texture: %s", computer.display.GetError()
+					);
+					exit(1);
+				}
+
+				writefln("Initialised graphics mode 0x%.2X", mode);
 				break;
 			}
 			default: break;

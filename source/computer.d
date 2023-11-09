@@ -669,6 +669,7 @@ class Computer {
 int ComputerCLI(string[] args) {
 	auto display  = new Display();
 	display.Init();
+	writeln("Initialised display");
 	
 	auto computer = new Computer();
 	display.computer = computer;
