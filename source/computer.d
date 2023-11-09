@@ -784,6 +784,8 @@ int ComputerCLI(string[] args) {
 					computer.a, computer.b, computer.c, computer.d, computer.e, computer.f,
 					computer.ds, computer.sr, computer.ip, computer.sp, computer.bs
 				);
+				stderr.writeln("===============");
+				stderr.writefln("RAM[IP] = %.2X", computer.ram[computer.ip]);
 				writeln(e);
 				return 1;
 			}

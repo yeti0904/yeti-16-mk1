@@ -196,7 +196,7 @@ class Assembler {
 		}
 	}
 
-	void Assemble() {
+	void Assemble(bool printLabels) {
 		// generate labels
 		uint labelBase = 0x050000;
 		uint labelAddr = labelBase;
@@ -208,6 +208,10 @@ class Assembler {
 					if (InstructionExists(node.name)) {
 						Error("Labels cannot have the same name as an instruction");
 						exit(1);
+					}
+
+					if (printLabels) {
+						writefln("%s: %.6X", node.name, labelAddr);
 					}
 				
 					labels[node.name] = labelAddr;
@@ -412,6 +416,7 @@ int AssemblerCLI(string[] args) {
 	string outFile = "out.bin";
 	bool   debugLexer;
 	bool   debugParser;
+	bool   printLabels = false;;
 
 	for (size_t i = 0; i < args.length; ++ i) {
 		if (args[i][0] == '-') {
@@ -429,6 +434,11 @@ int AssemblerCLI(string[] args) {
 				case "-a":
 				case "--parser": {
 					debugParser = true;
+					break;
+				}
+				case "-l":
+				case "--labels": {
+					printLabels = true;
 					break;
 				}
 				default: {
@@ -470,7 +480,7 @@ int AssemblerCLI(string[] args) {
 	}
 
 	assembler.nodes = parser.nodes;
-	assembler.Assemble();
+	assembler.Assemble(printLabels);
 	std.file.write(outFile, assembler.output);
 	return 0;
 }
