@@ -10,6 +10,7 @@ enum NodeType {
 	Null,
 	Instruction,
 	Label,
+	Macro,
 	Identifier,
 	Register,
 	RegisterPair,
@@ -48,6 +49,21 @@ class LabelNode : Node {
 
 	this(string pname, ErrorInfo perror) {
 		type  = NodeType.Label;
+		name  = pname;
+		error = perror;
+	}
+
+	override string toString() {
+		return format("%s:", name);
+	}
+}
+
+class MacroNode : Node {
+	string name;
+	Node   value;
+
+	this(string pname, ErrorInfo perror) {
+		type  = NodeType.Macro;
 		name  = pname;
 		error = perror;
 	}
@@ -133,7 +149,7 @@ class Parser {
 	Token[] tokens;
 
 	this() {
-		
+
 	}
 
 	ErrorInfo CurrentError() {
@@ -192,6 +208,21 @@ class Parser {
 				while (tokens[i].type != TokenType.End) {
 					ret.params ~= ParseParameter();
 					Next();
+				}
+				return ret;
+			}
+			case TokenType.Macro: {
+				Next();
+
+				auto ret = new MacroNode(tokens[i].contents, CurrentError());
+
+				Next();
+
+				ret.value = ParseParameter();
+				Next();
+
+				if (tokens[i].type != TokenType.End) {
+					assert(0); // TODO: Error
 				}
 				return ret;
 			}
