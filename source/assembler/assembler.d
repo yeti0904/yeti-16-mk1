@@ -259,7 +259,7 @@ class Assembler {
 		}
 
 		for (i = 0; i < nodes.length; ++ i) {
-			if (nodes[i].type == NodeType.Label || nodes[i].type == NodeType.Macro) {
+			if ((nodes[i].type == NodeType.Label) || (nodes[i].type == NodeType.Macro)) {
 				continue;
 			}
 
