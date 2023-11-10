@@ -33,6 +33,7 @@ class Assembler {
 	size_t           i;
 	Node[]           nodes;
 	uint[string]     labels;
+	Node[string]     macros;
 
 	this() {
 		// instructions
@@ -196,6 +197,21 @@ class Assembler {
 		}
 	}
 
+	Node EvalIdentifier(IdentifierNode id) {
+		if (id.name in macros) {
+			auto value = macros[id.name];
+			if (value.type == NodeType.Identifier) {
+				return EvalIdentifier(cast(IdentifierNode) value);
+			}
+			else {
+				return value;
+			}
+		}
+		else {
+			return id;
+		}
+	}
+
 	void Assemble(bool printLabels) {
 		// generate labels
 		uint labelBase = 0x050000;
@@ -204,7 +220,7 @@ class Assembler {
 			switch (nodes[i].type) {
 				case NodeType.Label: {
 					auto node = cast(LabelNode) nodes[i];
-				
+
 					if (InstructionExists(node.name)) {
 						Error("Labels cannot have the same name as an instruction");
 						exit(1);
@@ -213,13 +229,13 @@ class Assembler {
 					if (printLabels) {
 						writefln("%s: %.6X", node.name, labelAddr);
 					}
-				
+
 					labels[node.name] = labelAddr;
 					break;
 				}
 				case NodeType.Instruction: {
 					auto node = cast(InstructionNode) nodes[i];
-				
+
 					if (!InstructionExists(node.name)) {
 						break;
 					}
@@ -227,15 +243,26 @@ class Assembler {
 					labelAddr += GetInstructionSize(node);
 					break;
 				}
+				case NodeType.Macro: {
+					auto node = cast(MacroNode) nodes[i];
+
+					if (InstructionExists(node.name)) {
+						Error("Macros cannot have the same name as an instruction");
+						exit(1);
+					}
+
+					macros[node.name] = node.value;
+					break;
+				}
 				default: break;
 			}
 		}
-	
+
 		for (i = 0; i < nodes.length; ++ i) {
-			if (nodes[i].type == NodeType.Label) {
+			if ((nodes[i].type == NodeType.Label) || (nodes[i].type == NodeType.Macro)) {
 				continue;
 			}
-		
+
 			ExpectType(NodeType.Instruction);
 
 			auto node = cast(InstructionNode) nodes[i];
@@ -245,12 +272,16 @@ class Assembler {
 				exit(1);
 			}
 
-			auto inst  = GetInstruction(node.name);
+			auto inst = GetInstruction(node.name);
 
 			if (inst.special) {
 				final switch (inst.name) {
 					case "db": {
 						foreach (ref param ; node.params) {
+							if (param.type == NodeType.Identifier) {
+								param = EvalIdentifier(cast(IdentifierNode) param);
+							}
+
 							switch (param.type) {
 								case NodeType.Integer: {
 									output ~= cast(ubyte) (cast(IntegerNode) param).value;
@@ -310,28 +341,33 @@ class Assembler {
 
 				foreach (i, ref arg ; inst.args) {
 					bool valid;
-				
+
+					auto param = node.params[i];
+					if (param.type == NodeType.Identifier) {
+						param = EvalIdentifier(cast(IdentifierNode) param);
+					}
+
 					final switch (arg) {
 						case Param.Register: {
-							valid = node.params[i].type == NodeType.Register;
+							valid = param.type == NodeType.Register;
 							break;
 						}
 						case Param.RegisterPair: {
-							valid = node.params[i].type == NodeType.RegisterPair;
+							valid = param.type == NodeType.RegisterPair;
 							break;
 						}
 						case Param.Byte: {
-							valid = node.params[i].type == NodeType.Integer;
+							valid = param.type == NodeType.Integer;
 							break;
 						}
 						case Param.Word: {
-							valid = node.params[i].type == NodeType.Integer;
+							valid = param.type == NodeType.Integer;
 							break;
 						}
 						case Param.Addr: {
 							valid = (
-								(node.params[i].type == NodeType.Integer) ||
-								(node.params[i].type == NodeType.Identifier)
+								(param.type == NodeType.Integer) ||
+								(param.type == NodeType.Identifier)
 							);
 							break;
 						}
@@ -349,28 +385,33 @@ class Assembler {
 				}
 
 				foreach (i, ref arg ; inst.args) {
+					auto param = node.params[i];
+					if (param.type == NodeType.Identifier) {
+						param = EvalIdentifier(cast(IdentifierNode) param);
+					}
+
 					final switch (arg) {
 						case Param.Register: {
-							auto paramNode = cast(RegisterNode) node.params[i];
-							
+							auto paramNode = cast(RegisterNode) param;
+
 							output ~= RegisterByte(paramNode.name);
 							break;
 						}
 						case Param.RegisterPair: {
-							auto paramNode = cast(RegisterPairNode) node.params[i];
-						
+							auto paramNode = cast(RegisterPairNode) param;
+
 							output ~= RegisterPairByte(paramNode.name);
 							break;
 						}
 						case Param.Byte: {
-							auto paramNode = cast(IntegerNode) node.params[i];
-						
+							auto paramNode = cast(IntegerNode) param;
+
 							output ~= cast(ubyte) paramNode.value;
 							break;
 						}
 						case Param.Word: {
-							auto paramNode = cast(IntegerNode) node.params[i];
-						
+							auto paramNode = cast(IntegerNode) param;
+
 							ushort word  = cast(ushort) paramNode.value;
 							output      ~= cast(ubyte) (word & 0xFF);
 							output      ~= cast(ubyte) ((word & 0xFF00) >> 8);
@@ -378,17 +419,17 @@ class Assembler {
 						}
 						case Param.Addr: {
 							uint addr;
-							
-							switch (node.params[i].type) {
+
+							switch (param.type) {
 								case NodeType.Integer: {
-									auto paramNode = cast(IntegerNode) node.params[i];
-									
+									auto paramNode = cast(IntegerNode) param;
+
 									addr = paramNode.value;
 									break;
 								}
 								case NodeType.Identifier: {
-									auto paramNode = cast(IdentifierNode) node.params[i];
-								
+									auto paramNode = cast(IdentifierNode) param;
+
 									addr = labels[paramNode.name];
 
 									if ((inst.name == "jmpb") || (inst.name == "jnzb")) {
