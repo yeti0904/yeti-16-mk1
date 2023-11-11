@@ -40,7 +40,9 @@ class Display {
 			exit(1);
 		}
 
-		window = SDL_CreateWindow(toStringz("YETI-16"), 0, 0, 640, 400, 0);
+		window = SDL_CreateWindow(
+			toStringz("YETI-16"), 0, 0, 640, 400, SDL_WINDOW_RESIZABLE
+		);
 
 		if (window is null) {
 			stderr.writefln("Failed to create window: %s", GetError());
@@ -67,6 +69,7 @@ class Display {
 		}
 
 		pixels = new uint[](resolution.x * resolution.y);
+		SDL_RenderSetLogicalSize(renderer, resolution.x, resolution.y);
 	}
 
 	string GetError() {
@@ -117,6 +120,12 @@ class Display {
 						break;
 					}
 				}
+
+				SDL_SetRenderDrawColor(
+					renderer, computer.ram[paletteAddr], computer.ram[paletteAddr + 1],
+					computer.ram[paletteAddr + 2], 255
+				);
+				SDL_RenderClear(renderer);
 
 				auto expectedRes = Vec2!int(
 					cast(int) cellDim.x * 8, cast(int) cellDim.y * 8
@@ -169,6 +178,11 @@ class Display {
 			}
 			case 0x10: {
 				ubyte[256 * 3] paletteData = computer.ram[0x00FE05 .. 0x10105];
+
+				SDL_SetRenderDrawColor(
+					renderer, paletteData[0], paletteData[1], paletteData[2], 255
+				);
+				SDL_RenderClear(renderer);
 
 				for (uint i = 0x000405; i < 0x00FE05; ++ i) {
 					uint  offset   = i - 0x000405;

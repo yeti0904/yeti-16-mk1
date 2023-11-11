@@ -92,9 +92,9 @@ class GraphicsController : Device {
 					default: break;
 				}
 
-				SDL_SetWindowSize(
-					computer.display.window, cast(int) (computer.display.resolution.x) * 2,
-					cast(int) (computer.display.resolution.y) * 2
+				SDL_RenderSetLogicalSize(
+					computer.display.renderer, computer.display.resolution.x,
+					computer.display.resolution.y
 				);
 				
 				SDL_DestroyTexture(computer.display.texture);
