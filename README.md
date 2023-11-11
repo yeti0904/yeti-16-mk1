@@ -8,6 +8,9 @@ embedding a scripting language
 
 It also includes an assembler for you to write programs in assembly
 
+## Links
+- [itch.io page](https://mesyeti.itch.io/yeti-16)
+
 ## Specs
 - 8 MHz CPU
 - 16 MiB RAM
