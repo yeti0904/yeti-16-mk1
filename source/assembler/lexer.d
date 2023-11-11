@@ -14,6 +14,7 @@ enum TokenType {
 	Integer,
 	String,
 	Label,
+	Macro,
 	Hex,
 	Binary,
 	End
@@ -38,7 +39,7 @@ class Lexer {
 	string  file;
 
 	this() {
-		
+
 	}
 
 	void AddToken(TokenType type) {
@@ -62,6 +63,9 @@ class Lexer {
 		else if (reading.isNumeric()) {
 			AddToken(TokenType.Integer);
 		}
+		else if (reading == "macro") {
+			AddToken(TokenType.Macro);
+		}
 		else {
 			AddToken(TokenType.Identifier);
 		}
@@ -82,7 +86,7 @@ class Lexer {
 			else {
 				++ col;
 			}
-		
+
 			if (inString) {
 				switch (src[i]) {
 					case '"': {
@@ -108,7 +112,7 @@ class Lexer {
 							reading = "";
 							break;
 						}
-					
+
 						AddReading();
 						break;
 					}
@@ -131,7 +135,7 @@ class Lexer {
 					}
 					case ';': {
 						AddToken(TokenType.End);
-						
+
 						while ((i < src.length) && (src[i] != '\n')) {
 							++ i;
 
