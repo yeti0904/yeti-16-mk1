@@ -1,17 +1,24 @@
 # Architecture
 
 ## Registers
-- A  (16-bit) accumulator, general purpose
-- B  (16-bit) accumulator, general purpose
-- C  (16-bit) general purpose
-- D  (16-bit) general purpose
-- E  (16-bit) general purpose
-- F  (16-bit) general purpose 
-- DS (24-bit) destination pointer, general purpose
-- SR (24-bit) source pointer, general purpose
-- IP (24-bit) instruction pointer
-- SP (24-bit) stack pointer (grows upwards)
-- BS (24-bit) base pointer (points to start of program)
+- (0) A  (16-bit) accumulator, general purpose
+- (1) B  (16-bit) accumulator, general purpose
+- (2) C  (16-bit) general purpose
+- (3) D  (16-bit) general purpose
+- (4) E  (16-bit) general purpose
+- (5) F  (16-bit) general purpose 
+
+## Register pairs
+- (0) AB (24-bit) accumulator, general purpose
+- (1) CD (24-bit) general purpose
+- (2) EF (24-bit) general purpose
+- (3) DS (24-bit) destination pointer, general purpose
+- (4) SR (24-bit) source pointer, general purpose
+- (5) IP (24-bit) instruction pointer
+- (6) SP (24-bit) stack pointer (grows upwards)
+- (7) BS (24-bit) base pointer (points to start of program)
+
+Note: AB, CD, EF are made out of (A, B), (C, D), (E, F) 16-bit registers
 
 ## Instruction format
 Opcode is a byte (8-bit), and then parameters after are either bytes for data or
