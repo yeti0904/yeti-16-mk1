@@ -1,17 +1,17 @@
 # Architecture
 
 ## Registers
-- A  (16-bit)
-- B  (16-bit)
-- C  (16-bit)
-- D  (16-bit)
-- E  (16-bit)
-- F  (16-bit) 
-- DS (24-bit)
-- SR (24-bit)
-- IP (24-bit)
-- SP (24-bit)
-- BS (24-bit)
+- A  (16-bit) accumulator, general purpose
+- B  (16-bit) accumulator, general purpose
+- C  (16-bit) general purpose
+- D  (16-bit) general purpose
+- E  (16-bit) general purpose
+- F  (16-bit) general purpose 
+- DS (24-bit) destination pointer, general purpose
+- SR (24-bit) source pointer, general purpose
+- IP (24-bit) instruction pointer
+- SP (24-bit) stack pointer (grows upwards)
+- BS (24-bit) base pointer (points to start of program)
 
 ## Instruction format
 Opcode is a byte (8-bit), and then parameters after are either bytes for data or
