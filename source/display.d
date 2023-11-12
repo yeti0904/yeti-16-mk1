@@ -41,7 +41,8 @@ class Display {
 		}
 
 		window = SDL_CreateWindow(
-			toStringz("YETI-16"), 0, 0, 640, 400, SDL_WINDOW_RESIZABLE
+			toStringz("YETI-16"), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+			640, 400, SDL_WINDOW_RESIZABLE
 		);
 
 		if (window is null) {
