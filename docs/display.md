@@ -47,3 +47,11 @@ B B B B F F F F
 B = background colour
 
 F = foreground colour
+
+## Palette data
+Palette data is stored as 3 byte RGB values in this order:
+| Offset | Value |
+| ------ | ----- |
+| 0      | Red   |
+| 1      | Green |
+| 2      | Blue  |
