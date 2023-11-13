@@ -116,6 +116,7 @@ class Lexer {
 						AddReading();
 						break;
 					}
+					case '\r': break;
 					case '\n': {
 						if (reading.strip() == "") {
 							reading = "";
