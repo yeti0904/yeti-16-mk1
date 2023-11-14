@@ -687,13 +687,13 @@ class Computer {
 			case Opcode.WRWB: {
 				auto addr  = ReadRegPair(NextByte());
 				auto value = ReadReg(NextByte());
-				WriteWord(addr, value);
+				WriteWord(bs + addr, value);
 				break;
 			}
 			case Opcode.WRAB: {
 				auto addr = ReadRegPair(NextByte());
 				auto value = ReadRegPair(NextByte());
-				WriteAddr(addr, value);
+				WriteAddr(bs + addr, value);
 				break;
 			}
 			case Opcode.HLT: {
