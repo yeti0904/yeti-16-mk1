@@ -64,6 +64,12 @@ enum Opcode {
 	POP  = 0x2B,
 	JZ   = 0x2C,
 	JZB  = 0x2D,
+	RDBB = 0x2E,
+	RDWB = 0x2F,
+	RDAB = 0x30,
+	WRBB = 0x31,
+	WRWB = 0x32,
+	WRAB = 0x33,
 	HLT  = 0xFF
 }
 
@@ -655,6 +661,39 @@ class Computer {
 				if (a == 0) {
 					ip = bs + addr;
 				}
+				break;
+			}
+			case Opcode.RDBB: {
+				auto addr = ReadRegPair(NextByte());
+				a = ram[bs + addr];
+				break;
+			}
+			case Opcode.RDWB: {
+				auto addr = ReadRegPair(NextByte());
+				a = ReadWord(bs + addr);
+				break;
+			}
+			case Opcode.RDAB: {
+				auto addr = ReadRegPair(NextByte());
+				WriteRegPair(RegPair.AB, ReadAddr(bs + addr));
+				break;
+			}
+			case Opcode.WRBB: {
+				auto addr      = ReadRegPair(NextByte());
+				auto value     = ReadReg(NextByte());
+				ram[bs + addr] = cast(ubyte) value;
+				break;
+			}
+			case Opcode.WRWB: {
+				auto addr  = ReadRegPair(NextByte());
+				auto value = ReadReg(NextByte());
+				WriteWord(addr, value);
+				break;
+			}
+			case Opcode.WRAB: {
+				auto addr = ReadRegPair(NextByte());
+				auto value = ReadRegPair(NextByte());
+				WriteAddr(addr, value);
 				break;
 			}
 			case Opcode.HLT: {

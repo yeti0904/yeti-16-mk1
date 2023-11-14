@@ -81,6 +81,12 @@ class Assembler {
 		AddInstruction("diff", Opcode.DIFF, [Param.RegisterPair, Param.RegisterPair]);
 		AddInstruction("jz",   Opcode.JZ,   [Param.Addr]);
 		AddInstruction("jzb",  Opcode.JZB,  [Param.Addr]);
+		AddInstruction("rdbb", Opcode.RDBB, [Param.RegisterPair]);
+		AddInstruction("rdwb", Opcode.RDWB, [Param.RegisterPair]);
+		AddInstruction("rdab", Opcode.RDAB, [Param.RegisterPair]);
+		AddInstruction("wrbb", Opcode.WRBB, [Param.RegisterPair, Param.Register]);
+		AddInstruction("wrwb", Opcode.WRWB, [Param.RegisterPair, Param.Register]);
+		AddInstruction("wrab", Opcode.WRAB, [Param.RegisterPair, Param.RegisterPair]);
 		AddInstruction("hlt",  Opcode.HLT,  []);
 
 		// special
@@ -432,7 +438,16 @@ class Assembler {
 
 									addr = labels[paramNode.name];
 
-									if ((inst.name == "jmpb") || (inst.name == "jnzb")) {
+									string[] bsInstructions = [
+										"jmpb", "jmpzb", "jzb", "rdbb", "rdwb", "rdab",
+										"wrbb", "wrwb", "wrab"
+									];
+
+									/*if ((inst.name == "jmpb") || (inst.name == "jnzb")) {
+										addr -= labelBase;
+									}*/
+
+									if (bsInstructions.canFind(inst.name)) {
 										addr -= labelBase;
 									}
 									break;

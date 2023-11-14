@@ -85,4 +85,10 @@ registers, words (16-bit) for data, and 24-bit values for addresses
 - `POP (reg)` (0x2B) - Pops a value from the stack and stores it in the given register
 - `JZ (addr)` (0x2C) - Jumps to the given address if A is 0
 - `JZB (addr)` (0x2D)- Jumps to the given address + `BC` if A is 0
+- `RDBB (reg pair)` (0x2E) - Reads a byte from `BS` + reg pair and stores it in `A`
+- `RDWB (reg pair)` (0x2F) - Reads a 16-bit value from `BS` + reg pair and stores it in `A`
+- `RDAB (reg pair)` (0x30) - Reads a 24-bit value from `BS` + reg pair and stores it in `A`
+- `WRBB (reg pair) (reg)` (0x31) - Writes the low 8-bits of `reg` to `BS` + reg pair
+- `WRWB (reg pair) (reg)` (0x32) - Writes `reg` to `BS` + reg pair
+- `WRAB (reg pair) (reg pair)` (0x33) - Writes the second reg pair to `BS` + second reg pair
 - `HLT` (0xFF) - Stops execution
