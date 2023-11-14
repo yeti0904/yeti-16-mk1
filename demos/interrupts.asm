@@ -16,8 +16,8 @@ set a 2
 set b 80
 out a b
 
-; set screen colours to white text on blue background
-set a 0x4F
+; set screen colours to white text on black background
+set a 0x0F
 lda ds 0x18B5
 set c 3200
 setl a
@@ -28,20 +28,21 @@ set c 3200
 set a 32
 setl a
 
-; now to print hello world
-lda ds 1029
-lda sr string
+; load interrupt
+lda ds 4
+set a 255
+wrb ds a ; enables interrupt
+lda ds 5
+lda ab interrupt_handler
+wra ds ab ; puts interrupt in table
 
-loop:
-	rdb sr
-	jz end
-	wrb ds a
-	incp ds
-	incp sr
-	jmp loop
-
+; call interrupt
+int 0
 end:
 	jmp end
 
-string:
-	db "hello world" 0
+interrupt_handler:
+	lda ds 1029
+	set a 65
+	wrb ds a
+	ret
