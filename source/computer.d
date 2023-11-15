@@ -70,6 +70,11 @@ enum Opcode {
 	WRBB = 0x31,
 	WRWB = 0x32,
 	WRAB = 0x33,
+	LT   = 0x34,
+	GT   = 0x35,
+	CMPP = 0x36,
+	LTP  = 0x37,
+	GTP  = 0x38,
 	HLT  = 0xFF
 }
 
@@ -694,6 +699,36 @@ class Computer {
 				auto addr = ReadRegPair(NextByte());
 				auto value = ReadRegPair(NextByte());
 				WriteAddr(bs + addr, value);
+				break;
+			}
+			case Opcode.LT: {
+				auto v1 = ReadReg(NextByte());
+				auto v2 = ReadReg(NextByte());
+				a       = v1 < v2? 0xFFFF : 0;
+				break;
+			}
+			case Opcode.GT: {
+				auto v1 = ReadReg(NextByte());
+				auto v2 = ReadReg(NextByte());
+				a       = v1 > v2? 0xFFFF : 0;
+				break;
+			}
+			case Opcode.CMPP: {
+				auto v1 = ReadRegPair(NextByte());
+				auto v2 = ReadRegPair(NextByte());
+				a       = v1 == v2? 0xFFFF : 0;
+				break;
+			}
+			case Opcode.LTP: {
+				auto v1 = ReadRegPair(NextByte());
+				auto v2 = ReadRegPair(NextByte());
+				a       = v1 < v2? 0xFFFF : 0;
+				break;
+			}
+			case Opcode.GTP: {
+				auto v1 = ReadRegPair(NextByte());
+				auto v2 = ReadRegPair(NextByte());
+				a       = v1 > v2? 0xFFFF : 0;
 				break;
 			}
 			case Opcode.HLT: {

@@ -87,6 +87,11 @@ class Assembler {
 		AddInstruction("wrbb", Opcode.WRBB, [Param.RegisterPair, Param.Register]);
 		AddInstruction("wrwb", Opcode.WRWB, [Param.RegisterPair, Param.Register]);
 		AddInstruction("wrab", Opcode.WRAB, [Param.RegisterPair, Param.RegisterPair]);
+		AddInstruction("lt",   Opcode.LT,   [Param.Register, Param.Register]);
+		AddInstruction("gt",   Opcode.GT,   [Param.Register, Param.Register]);
+		AddInstruction("cmpp", Opcode.CMPP, [Param.RegisterPair, Param.RegisterPair]);
+		AddInstruction("gtp",  Opcode.GTP, [Param.RegisterPair, Param.RegisterPair]);
+		AddInstruction("ltp",  Opcode.LTP, [Param.RegisterPair, Param.RegisterPair]);
 		AddInstruction("hlt",  Opcode.HLT,  []);
 
 		// special

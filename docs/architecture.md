@@ -91,4 +91,14 @@ registers, words (16-bit) for data, and 24-bit values for addresses
 - `WRBB (reg pair) (reg)` (0x31) - Writes the low 8-bits of `reg` to `BS` + reg pair
 - `WRWB (reg pair) (reg)` (0x32) - Writes `reg` to `BS` + reg pair
 - `WRAB (reg pair) (reg pair)` (0x33) - Writes the second reg pair to `BS` + second reg pair
+- `LT (reg) (reg)` (0x34) - Sets `A` to 65535 if the first register is less than the
+                            second register, and 0 if it isn't
+- `GT (reg) (reg)` (0x35) - Sets `A` to 65535 if the first register is greater than the
+                            second register, and 0 if it isn't
+- `CMPP (reg pair) (reg pair)` (0x36) - Sets `A` to 65535 if the reg pairs are equal,
+                                        and 0 if they aren't
+- `LTP (reg pair) (reg pair)` (0x37) - Sets `A` to 65535 if the first reg pair is less
+                                       than the second, and 0 if it isn't
+- `GTP (reg pair) (reg pair)` (0x38) - Sets `A` to 65535 if the first reg pair is greater
+                                       than the second, and 0 if it isn't
 - `HLT` (0xFF) - Stops execution
