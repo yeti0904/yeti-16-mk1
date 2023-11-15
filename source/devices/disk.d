@@ -56,7 +56,7 @@ class Disk : Device {
 
 					data ~= cast(ushort) 'R';
 
-					for (uint i = 512*sector; i < 512*(sector + amount); ++ i) {
+					for (uint i = 512 * sector; i < 512 * (sector + amount); ++ i) {
 						data ~= diskData[i];
 					}
 					input = [];
