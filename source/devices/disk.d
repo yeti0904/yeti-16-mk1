@@ -51,23 +51,19 @@ class Disk : Device {
 					if (input.length < 3) {
 						return;
 					}
-
 					ushort sector = input[1];
 					ushort amount = input[2];
 
 					data ~= cast(ushort) 'R';
 
-					for (uint i = sector; i < sector + amount; ++ i) {
-						uint sectorStart = i * 512;
-						uint sectorEnd   = sectorStart + 512;
-
-						for (uint j = sectorStart; j < sectorEnd; ++ j) {
-							data ~= diskData[j];
-						}
+					for (uint i = 512*sector; i < 512*(sector + amount); ++ i) {
+						data ~= diskData[i];
 					}
+					input = [];
+					waiting = false;
 					break;
 				}
-				case 'W': {
+				case 'W': { // todo: test writes
 					if (input.length < 514) {
 						return;
 					}
