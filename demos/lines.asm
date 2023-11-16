@@ -16,10 +16,10 @@ loop:
 	set d 0
 	cmp b d
 	; draws black if its even
-	jnz draw_black
+	jnzb draw_black
 	; and white if its odd
 	set b 15
-	jmp next
+	jmpb next
 
 draw_black:
 	set b 0
@@ -32,8 +32,8 @@ next:
 	set b 0
 	; checks if rendered every pixel
 	cmp c b
-	jnz end
-	jmp loop
+	jnzb end ; crashes here?
+	jmpb loop
 
 end:
-	jmp end
+	jmpb end

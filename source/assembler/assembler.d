@@ -449,7 +449,7 @@ class Assembler {
 									addr = labels[paramNode.name];
 
 									string[] bsInstructions = [
-										"jmpb", "jmpzb", "jzb", "rdbb", "rdwb", "rdab",
+										"jmpb", "jnzb", "jzb", "rdbb", "rdwb", "rdab",
 										"wrbb", "wrwb", "wrab"
 									];
 
