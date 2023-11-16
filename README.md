@@ -1,3 +1,5 @@
+<center><img src="/screenshots/biglogo.png"></center>
+
 # YETI-16
 ![Lines demo](/screenshots/hello_world.png)
 
