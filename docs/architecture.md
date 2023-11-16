@@ -101,4 +101,7 @@ registers, words (16-bit) for data, and 24-bit values for addresses
                                        than the second, and 0 if it isn't
 - `GTP (reg pair) (reg pair)` (0x38) - Sets `A` to 65535 if the first reg pair is greater
                                        than the second, and 0 if it isn't
+- `PUSHA (reg pair)` (0x39) - Pushes the given register pair to the stack
+- `POPA (reg pair)` (0x3A) - Pops a register pair from the stack and stores it in the
+                             given register pair
 - `HLT` (0xFF) - Stops execution
