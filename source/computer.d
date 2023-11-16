@@ -84,7 +84,9 @@ enum Register {
 	C = 2,
 	D = 3,
 	E = 4,
-	F = 5
+	F = 5,
+	H = 6,
+	I = 7
 }
 
 enum RegPair {
@@ -95,7 +97,8 @@ enum RegPair {
 	SR = 4,
 	BS = 5,
 	IP = 6,
-	SP = 7
+	SP = 7,
+	HI = 8
 }
 
 enum ErrorInterrupt {
@@ -138,6 +141,8 @@ class Computer {
 	ushort d;
 	ushort e;
 	ushort f;
+	ushort h;
+	ushort i;
 	uint   ds;
 	uint   sr;
 	uint   ip;
@@ -213,6 +218,8 @@ class Computer {
 			case Register.D: d = value; break;
 			case Register.E: e = value; break;
 			case Register.F: f = value; break;
+			case Register.H: h = value; break;
+			case Register.I: i = value; break;
 			default:         Error(ErrorInterrupt.BadParam);
 		}
 	}
@@ -225,6 +232,8 @@ class Computer {
 			case Register.D: return d;
 			case Register.E: return e;
 			case Register.F: return f;
+			case Register.H: return h;
+			case Register.I: return i;
 			default: {
 				Error(ErrorInterrupt.BadParam);
 				return 0;
@@ -254,26 +263,26 @@ class Computer {
 			case RegPair.BS: bs = value; break;
 			case RegPair.IP: ip = value; break;
 			case RegPair.SP: sp = value; break;
+			case RegPair.HI: {
+				h = cast(ushort) ((value & 0xFF0000) >> 16);
+				i = cast(ushort) (value & 0xFFFF);
+				break;
+			}
 			default:         Error(ErrorInterrupt.BadParam);
 		}
 	}
 
 	uint ReadRegPair(ubyte reg) {
 		switch (reg) {
-			case RegPair.AB: {
-				return (cast(uint) (a) << 16) | b;
-			}
-			case RegPair.CD: {
-				return (cast(uint) (c) << 16) | d;
-			}
-			case RegPair.EF: {
-				return (cast(uint) (e) << 16) | f;
-			}
+			case RegPair.AB: return (cast(uint) (a) << 16) | b;
+			case RegPair.CD: return (cast(uint) (c) << 16) | d;
+			case RegPair.EF: return (cast(uint) (e) << 16) | f;
 			case RegPair.DS: return ds;
 			case RegPair.SR: return sr;
 			case RegPair.BS: return bs;
 			case RegPair.IP: return ip;
 			case RegPair.SP: return sp;
+			case RegPair.HI: return (cast(uint) (h) << 16) | i;
 			default: {
 				Error(ErrorInterrupt.BadParam);
 				return 0;

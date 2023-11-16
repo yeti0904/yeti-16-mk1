@@ -6,16 +6,16 @@ import yeti16.deviceBase;
 
 static SDL_Scancode[] CharToKeys(ushort ch) {
 	switch (ch) {
-		case '0': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_0];
-		case '1': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_1];
-		case '2': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_2];
-		case '3': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_3];
-		case '4': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_4];
-		case '5': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_5];
-		case '6': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_6];
-		case '7': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_7];
-		case '8': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_8];
-		case '9': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_9];
+		case '0': return [SDL_SCANCODE_0];
+		case '1': return [SDL_SCANCODE_1];
+		case '2': return [SDL_SCANCODE_2];
+		case '3': return [SDL_SCANCODE_3];
+		case '4': return [SDL_SCANCODE_4];
+		case '5': return [SDL_SCANCODE_5];
+		case '6': return [SDL_SCANCODE_6];
+		case '7': return [SDL_SCANCODE_7];
+		case '8': return [SDL_SCANCODE_8];
+		case '9': return [SDL_SCANCODE_9];
 		case 'A': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_A];
 		case 'B': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_B];
 		case 'C': return [SDL_SCANCODE_LSHIFT, SDL_SCANCODE_C];

@@ -172,12 +172,14 @@ class Assembler {
 
 	ubyte RegisterByte(string reg) {
 		switch (reg) {
-			case "a": return 0;
-			case "b": return 1;
-			case "c": return 2;
-			case "d": return 3;
-			case "e": return 4;
-			case "f": return 5;
+			case "a": return Register.A;
+			case "b": return Register.B;
+			case "c": return Register.C;
+			case "d": return Register.D;
+			case "e": return Register.E;
+			case "f": return Register.F;
+			case "h": return Register.H;
+			case "i": return Register.I;
 			default:  assert(0);
 		}
 	}
@@ -192,6 +194,7 @@ class Assembler {
 			case "bs": return RegPair.BS;
 			case "ip": return RegPair.IP;
 			case "sp": return RegPair.SP;
+			case "hi": return RegPair.HI;
 			default:   assert(0);
 		}
 	}
