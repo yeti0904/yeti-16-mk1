@@ -178,20 +178,23 @@ class Display {
 				break;
 			}
 			case 0x10: {
-				ubyte[256 * 3] paletteData = computer.ram[0x00FE05 .. 0x10105];
+				uint paletteAddr = 0x00FE05;
+				uint pixelAddr   = 0x000405;
+				uint pixelEnd    = pixelAddr + (320 * 200);
 
 				SDL_SetRenderDrawColor(
-					renderer, paletteData[0], paletteData[1], paletteData[2], 255
+					renderer, computer.ram[paletteAddr], computer.ram[paletteAddr + 1],
+					computer.ram[paletteAddr + 2], 255
 				);
 				SDL_RenderClear(renderer);
 
-				for (uint i = 0x000405; i < 0x00FE05; ++ i) {
-					uint  offset   = i - 0x000405;
+				for (uint i = pixelAddr; i < pixelEnd; ++ i) {
+					uint  offset   = i - pixelAddr;
 					ubyte colour   = computer.ram[i];
 					pixels[offset] = ColourToInt(
-						paletteData[colour * 3],
-						paletteData[(colour * 3) + 1],
-						paletteData[(colour * 3) + 2]
+						computer.ram[paletteAddr + (colour * 3)],
+						computer.ram[paletteAddr + (colour * 3) + 1],
+						computer.ram[paletteAddr + (colour * 3) + 2]
 					);
 				}
 				break;
