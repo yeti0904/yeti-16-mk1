@@ -1,6 +1,6 @@
 <center><img src="/screenshots/biglogo.png"></center>
 
-# YETI-16
+<hr>
 ![Lines demo](/screenshots/hello_world.png)
 
 16-bit fantasy computer, aiming to be low-level yet easy to use
