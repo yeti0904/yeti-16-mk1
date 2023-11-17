@@ -177,10 +177,34 @@ class Display {
 				}
 				break;
 			}
-			case 0x10: {
-				uint paletteAddr = 0x00FE05;
-				uint pixelAddr   = 0x000405;
-				uint pixelEnd    = pixelAddr + (320 * 200);
+			case 0x10:
+			case 0x11: {
+				uint     paletteAddr = 0x00FE05;
+				uint     pixelAddr   = 0x000405;
+				uint     pixelEnd    = pixelAddr + (320 * 200);
+				Vec2!int expectedRes;
+
+				final switch (videoMode) {
+					case 0x10: {
+						paletteAddr = 0x00FE05;
+						pixelAddr   = 0x000405;
+						pixelEnd    = pixelAddr + (320 * 200);
+						expectedRes = Vec2!int(320, 200);
+						break;
+					}
+					case 0x11: {
+						paletteAddr = 0x013005;
+						pixelAddr   = 0x000405;
+						pixelEnd    = pixelAddr + (320 * 240);
+						expectedRes = Vec2!int(320, 240);
+						break;
+					}
+				}
+
+				if (resolution != expectedRes) {
+					deathColour = SDL_Color(0, 0, 255, 255);
+					goto default;
+				}
 
 				SDL_SetRenderDrawColor(
 					renderer, computer.ram[paletteAddr], computer.ram[paletteAddr + 1],

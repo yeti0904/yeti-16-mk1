@@ -89,6 +89,10 @@ class GraphicsController : Device {
 						computer.display.resolution = Vec2!int(320, 200);
 						break;
 					}
+					case 0x11: {
+						computer.display.resolution = Vec2!int(320, 240);
+						break;
+					}
 					default: break;
 				}
 

@@ -33,7 +33,14 @@ Attribute data is stored in 0x001275 - 0x0018B5
 
 Pixel data is stored in 0x000405 - 0x00FE05
 
-Palette data is stored in 0x00FE05 - 0x10105
+Palette data is stored in 0x00FE05 - 0x010105
+
+### 0x11
+320x240 video mode with 8bpp
+
+Pixel data is stored in 0x000405 - 0x013005
+
+Palette data is stored in 0x013005 - 0x013305
 
 ## Text data
 Text data is stored in 2 buffers:
