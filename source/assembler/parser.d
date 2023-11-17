@@ -251,6 +251,8 @@ class Parser {
 	}
 
 	void Parse() {
+		success = true;
+		
 		for (i = 0; i < tokens.length; ++ i) {
 			Node node;
 
