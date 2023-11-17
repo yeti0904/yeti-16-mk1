@@ -392,12 +392,10 @@ class Assembler {
 					}
 
 					if (!valid) {
-						Error(
-							format(
-								"Parameter %d is invalid for instruction %s", i + 1,
-								inst.name
-							)
-						);
+						Error(format(
+							"Parameter %d is invalid for instruction %s", i + 1,
+							inst.name
+						));
 						exit(1);
 					}
 				}
@@ -447,6 +445,13 @@ class Assembler {
 								}
 								case NodeType.Identifier: {
 									auto paramNode = cast(IdentifierNode) param;
+
+									if (paramNode.name !in labels) {
+										Error(format(
+											"No such label: '%s'", paramNode.name
+										));
+										return;
+									}
 
 									addr = labels[paramNode.name];
 
