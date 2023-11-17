@@ -74,14 +74,14 @@ class Lexer {
 	void Lex() {
 		reading   = "";
 		inString  = false;
-		line      = 1;
-		col       = 1;
+		line      = 0;
+		col       = 0;
 		src      ~= '\n';
 
 		for (i = 0; i < src.length; ++ i) {
 			if (src[i] == '\n') {
 				++ line;
-				col = 1;
+				col = 0;
 			}
 			else {
 				++ col;

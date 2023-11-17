@@ -526,7 +526,8 @@ int AssemblerCLI(string[] args) {
 	auto assembler = new Assembler();
 	auto lexer     = new Lexer();
 
-	lexer.src = readText(inFile);
+	lexer.src  = readText(inFile);
+	lexer.file = inFile;
 	lexer.Lex();
 
 	if (debugLexer) {
@@ -539,6 +540,10 @@ int AssemblerCLI(string[] args) {
 	auto parser = new Parser();
 	parser.tokens = lexer.tokens;
 	parser.Parse();
+
+	if (!parser.success) {
+		return 1;
+	}
 
 	if (debugParser) {
 		parser.PrintNodes();

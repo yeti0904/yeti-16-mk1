@@ -143,10 +143,17 @@ class StringNode : Node {
 	}
 }
 
+class ParserFail : Exception {
+	this(string msg = "", string file = __FILE__, size_t line = __LINE__) {
+		super(msg, file, line);
+	}
+}
+
 class Parser {
 	size_t  i;
 	Node[]  nodes;
 	Token[] tokens;
+	bool    success;
 
 	this() {
 
@@ -162,6 +169,11 @@ class Parser {
 		if (i >= tokens.length) {
 			assert(0);
 		}
+	}
+
+	void Error(string str) {
+		ErrorBegin(CurrentError());
+		stderr.writeln(str);
 	}
 
 	Node ParseParameter() {
@@ -190,6 +202,10 @@ class Parser {
 				return new IntegerNode(
 					to!int(tokens[i].contents[2 .. $], 2), CurrentError()
 				);
+			}
+			case TokenType.Label: {
+				Error("Cannot use label statement as parameter");
+				throw new ParserFail();
 			}
 			default: assert(0);
 		}
@@ -236,7 +252,15 @@ class Parser {
 
 	void Parse() {
 		for (i = 0; i < tokens.length; ++ i) {
-			auto node = ParseStatement();
+			Node node;
+
+			try {
+				node = ParseStatement();
+			}
+			catch (ParserFail) {
+				success = false;
+				return;
+			}
 
 			if (node !is null) {
 				nodes ~= node;
