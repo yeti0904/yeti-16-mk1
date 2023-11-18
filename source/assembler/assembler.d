@@ -329,7 +329,25 @@ class Assembler {
 						foreach (ref param ; node.params) {
 							switch (param.type) {
 								case NodeType.Integer: {
-									output ~= cast(ubyte) (cast(IntegerNode) param).value;
+									auto    paramNode = cast(IntegerNode) param;
+									ubyte[] bytes;
+									auto    val = paramNode.value;
+
+									final switch (inst.name) {
+										case "dw": {
+											bytes ~= cast(ubyte) (val & 0xFF);
+											bytes ~= cast(ubyte) ((val & 0xFF00) >> 8);
+											break;
+										}
+										case "da": {
+											bytes ~= cast(ubyte) (val & 0xFF);
+											bytes ~= cast(ubyte) ((val & 0xFF00) >> 8);
+											bytes ~= cast(ubyte) ((val & 0xFF0000) >> 16);
+											break;
+										}
+									}
+									
+									output ~= bytes;
 									break;
 								}
 								default: {
