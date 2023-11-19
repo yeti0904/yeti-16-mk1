@@ -96,7 +96,8 @@ class Assembler {
 		AddInstruction("ltp",   Opcode.LTP,   [Param.RegisterPair, Param.RegisterPair]);
 		AddInstruction("pusha", Opcode.PUSHA, [Param.RegisterPair]);
 		AddInstruction("popa",  Opcode.POPA,  [Param.RegisterPair]);
-		AddInstruction("hlt",   Opcode.HLT,  []);
+		AddInstruction("callb", Opcode.CALLB, [Param.Addr]);
+		AddInstruction("hlt",   Opcode.HLT,   []);
 
 		// special
 		AddInstruction("db", Param.Byte);

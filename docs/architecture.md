@@ -104,4 +104,5 @@ registers, words (16-bit) for data, and 24-bit values for addresses
 - `PUSHA (reg pair)` (0x39) - Pushes the given register pair to the stack
 - `POPA (reg pair)` (0x3A) - Pops a register pair from the stack and stores it in the
                              given register pair
+- `CALLB (addr)` (0x3B) - Pushes IP to the stack and jumps to `BS` + addr
 - `HLT` (0xFF) - Stops execution

@@ -77,6 +77,7 @@ enum Opcode {
 	GTP   = 0x38,
 	PUSHA = 0x39,
 	POPA  = 0x3A,
+	CALLB = 0x3B,
 	HLT   = 0xFF
 }
 
@@ -751,6 +752,14 @@ class Computer {
 			case Opcode.POPA: {
 				sp -= 3;
 				WriteRegPair(NextByte(), ReadAddr(sp));
+				break;
+			}
+			case Opcode.CALLB: {
+				auto addr = NextAddr();
+
+				WriteAddr(sp, ip);
+				sp += 3;
+				ip  = bs + addr;
 				break;
 			}
 			case Opcode.HLT: {
