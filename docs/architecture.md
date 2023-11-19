@@ -7,6 +7,8 @@
 - (3) D  (16-bit) general purpose
 - (4) E  (16-bit) general purpose
 - (5) F  (16-bit) general purpose 
+- (6) H  (16-bit) general purpose
+- (7) I  (16-bit) general purpose
 
 ## Register pairs
 - (0) AB (24-bit) accumulator, general purpose
