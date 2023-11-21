@@ -804,6 +804,10 @@ int ComputerCLI(string[] args) {
 					++ deviceTop;
 					break;
 				}
+				case "--dont": { // Don't
+					display.enableFF = true;
+					break;
+				}
 				default: {
 					stderr.writefln("Unknown flag '%s'", args[i]);
 					return 1;

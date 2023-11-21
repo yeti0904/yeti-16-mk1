@@ -17,6 +17,7 @@ class Display {
 	SDL_Texture*  texture;
 	uint[]        pixels;
 	Vec2!int      resolution;
+	bool          enableFF;
 
 	this() {
 		
@@ -219,6 +220,29 @@ class Display {
 						computer.ram[paletteAddr + (colour * 3)],
 						computer.ram[paletteAddr + (colour * 3) + 1],
 						computer.ram[paletteAddr + (colour * 3) + 2]
+					);
+				}
+				break;
+			}
+			case 0xFF: {
+				if (!enableFF) goto default;
+
+				uint pixelAddr   = 0x000405;
+				uint pixelEnd    = pixelAddr + (1920 * 1080 * 3);
+				auto expectedRes = Vec2!int(1920, 1080);
+
+				if (resolution != expectedRes) {
+					deathColour = SDL_Color(0, 0, 255, 255);
+					goto default;
+				}
+
+				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+				SDL_RenderClear(renderer);
+
+				for (uint i = pixelAddr; i < pixelEnd; i += 3) {
+					uint offset = i - pixelAddr;
+					pixels[offset] = ColourToInt(
+						computer.ram[i], computer.ram[i + 1], computer.ram[i + 2]
 					);
 				}
 				break;

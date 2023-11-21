@@ -12,7 +12,12 @@ Usage: %s {operation} [args]
 Operations:
 	asm {file} [-o {file}]
 		Compiles an assembly file to machine code
-		-o : Sets output binary file
+
+		Flags:
+		    -o : Sets output binary file
+		    -t : Show lexer output
+		    -a : parser output
+		    -l : Show label addresses
 
 	run {file}
 		Runs the given file in the emulator
