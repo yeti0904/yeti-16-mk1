@@ -34,14 +34,13 @@ lda sr string
 
 loop:
 	rdb sr
-	jz end
+	jz .end
 	wrb ds a
 	incp ds
 	incp sr
 	jmp loop
-
-end:
-	jmp end
+.end:
+	jmp .end
 
 string:
 	db "hello world" 0

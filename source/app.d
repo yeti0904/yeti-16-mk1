@@ -22,6 +22,9 @@ Operations:
 	run {file}
 		Runs the given file in the emulator
 
+		Flags:
+		    -d {file} : Adds a disk
+
 	new_disk {file} {size}
 		Creates a disk of {size} sectors and saves it in {file}
 ";

@@ -233,8 +233,9 @@ class Assembler {
 
 	void Assemble(bool printLabels) {
 		// generate labels
-		uint labelBase = 0x050000;
-		uint labelAddr = labelBase;
+		uint   labelBase = 0x050000;
+		uint   labelAddr = labelBase;
+		string lastLabel;
 		for (i = 0; i < nodes.length; ++ i) {
 			switch (nodes[i].type) {
 				case NodeType.Label: {
@@ -245,11 +246,20 @@ class Assembler {
 						exit(1);
 					}
 
-					if (printLabels) {
-						writefln("%s: %.6X", node.name, labelAddr);
+					string labelName = node.name;
+
+					if (labelName[0] == '.') {
+						labelName = lastLabel ~ labelName;
+					}
+					else {
+						lastLabel = labelName;
 					}
 
-					labels[node.name] = labelAddr;
+					labels[labelName] = labelAddr;
+					
+					if (printLabels) {
+						writefln("%s: %.6X", labelName, labelAddr);
+					}
 					break;
 				}
 				case NodeType.Instruction: {
@@ -278,6 +288,14 @@ class Assembler {
 		}
 
 		for (i = 0; i < nodes.length; ++ i) {
+			if (nodes[i].type == NodeType.Label) {
+				auto label = cast(LabelNode) nodes[i];
+
+				if (label.name[0] != '.') {
+					lastLabel = label.name;
+				}
+			}
+		
 			if ((nodes[i].type == NodeType.Label) || (nodes[i].type == NodeType.Macro)) {
 				continue;
 			}
@@ -465,14 +483,20 @@ class Assembler {
 								case NodeType.Identifier: {
 									auto paramNode = cast(IdentifierNode) param;
 
-									if (paramNode.name !in labels) {
+									string labelName = paramNode.name;
+
+									if (paramNode.name[0] == '.') {
+										labelName = lastLabel ~ labelName;
+									}
+
+									if (labelName !in labels) {
 										Error(format(
-											"No such label: '%s'", paramNode.name
+											"No such label: '%s'", labelName
 										));
 										return;
 									}
 
-									addr = labels[paramNode.name];
+									addr = labels[labelName];
 
 									string[] bsInstructions = [
 										"jmpb", "jnzb", "jzb", "rdbb", "rdwb", "rdab",
