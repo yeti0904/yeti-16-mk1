@@ -24,8 +24,15 @@ class Display {
 	}
 
 	void Init() {
+		string appPath = dirName(thisExePath());
+	
 		version (Windows) {
-			auto res = loadSDL(format("%s/sdl2.dll", dirName(thisExePath())).toStringz());
+			if (!exists(appPath ~ "/sdl2.dll")) {
+				stderr.writeln("SDL required");
+				exit(1);
+			}
+		
+			auto res = loadSDL(format("%s/sdl2.dll", appPath).toStringz());
 		}
 		else {
 			auto res = loadSDL();
@@ -224,12 +231,28 @@ class Display {
 				}
 				break;
 			}
+			case 0x12:
 			case 0xFF: {
-				if (!enableFF) goto default;
+				if ((videoMode == 0xFF) && !enableFF) goto default;
 
-				uint pixelAddr   = 0x000405;
-				uint pixelEnd    = pixelAddr + (1920 * 1080 * 3);
-				auto expectedRes = Vec2!int(1920, 1080);
+				uint     pixelAddr;
+				uint     pixelEnd;
+				Vec2!int expectedRes;
+
+				final switch (videoMode) {
+					case 0x12: {
+						pixelAddr   = 0x000405;
+						pixelEnd    = pixelAddr + (320 * 200 * 3);
+						expectedRes = Vec2!int(320, 200);
+						break;
+					}
+					case 0xFF: {
+						pixelAddr   = 0x000405;
+						pixelEnd    = pixelAddr + (1920 * 1080 * 3);
+						expectedRes = Vec2!int(1920, 1080);
+						break;
+					}
+				}
 
 				if (resolution != expectedRes) {
 					deathColour = SDL_Color(0, 0, 255, 255);
@@ -239,8 +262,8 @@ class Display {
 				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 				SDL_RenderClear(renderer);
 
-				for (uint i = pixelAddr; i < pixelEnd; i += 3) {
-					uint offset = i - pixelAddr;
+				uint offset = 0;
+				for (uint i = pixelAddr; i < pixelEnd; i += 3, ++ offset) {
 					pixels[offset] = ColourToInt(
 						computer.ram[i], computer.ram[i + 1], computer.ram[i + 2]
 					);

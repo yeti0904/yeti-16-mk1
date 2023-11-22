@@ -75,26 +75,37 @@ class GraphicsController : Device {
 			}
 			case 'M': {
 				ubyte mode = computer.ram[0x000404];
+				int   pixelSize;
 			
 				switch (mode) {
 					case 0x00: {
 						computer.display.resolution = Vec2!int(80 * 8, 40 * 8);
+						pixelSize = 1;
 						break;
 					}
 					case 0x01: {
 						computer.display.resolution = Vec2!int(40 * 8, 40 * 8);
+						pixelSize = 1;
 						break;
 					}
 					case 0x10: {
 						computer.display.resolution = Vec2!int(320, 200);
+						pixelSize = 1;
 						break;
 					}
 					case 0x11: {
 						computer.display.resolution = Vec2!int(320, 240);
+						pixelSize = 1;
+						break;
+					}
+					case 0x12: {
+						computer.display.resolution = Vec2!int(320, 200);
+						pixelSize = 3;
 						break;
 					}
 					case 0xFF: {
 						computer.display.resolution = Vec2!int(1920, 1080);
+						pixelSize = 3;
 						break;
 					}
 					default: break;
@@ -108,7 +119,9 @@ class GraphicsController : Device {
 				SDL_DestroyTexture(computer.display.texture);
 
 				computer.display.pixels  = new uint[](
-					computer.display.resolution.x * computer.display.resolution.y
+					computer.display.resolution.x *
+					computer.display.resolution.y *
+					pixelSize
 				);
 				computer.display.texture = SDL_CreateTexture(
 					computer.display.renderer, SDL_PIXELFORMAT_ABGR8888,

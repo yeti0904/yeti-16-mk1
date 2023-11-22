@@ -42,6 +42,13 @@ Pixel data is stored in 0x000405 - 0x013005
 
 Palette data is stored in 0x013005 - 0x013305
 
+### 0x12
+320x200 video mode with 24bpp
+
+Pixel data is stored in 0x000405 - 0x02F205
+
+See 24bpp pixel format for more info
+
 ## Text data
 Text data is stored in 2 buffers:
 - Characters
@@ -57,6 +64,14 @@ F = foreground colour
 
 ## Palette data
 Palette data is stored as 3 byte RGB values in this order:
+| Offset | Value |
+| ------ | ----- |
+| 0      | Red   |
+| 1      | Green |
+| 2      | Blue  |
+
+## 24bpp pixel format
+Pixels are stored as 3 byte RGB values in this order:
 | Offset | Value |
 | ------ | ----- |
 | 0      | Red   |
