@@ -1,3 +1,4 @@
+# Note: development has moved to https://github.com/yeti0904/yeti-16-mk2, it will soon replace this repository
 <center><img src="/screenshots/biglogo.png"></center>
 
 <hr>
